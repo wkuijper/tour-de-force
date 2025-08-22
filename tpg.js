@@ -1,4 +1,4 @@
-const hoods = 
+const segments = 
     {
         name: "LR",
         streets: [
@@ -396,14 +396,167 @@ const tours = [
                 parts: [  
                     {
                         street: "Hoofdstraat",
-                        numbers: "131,131B,127,123,62,60,60A,121,119,117,58,56,54,109,107,105,52,50,103,101,99,97,48,46,95,93,91,44,89,87,85,81,79,38,36,34,69,67,65,32,30A,30,28,59A,59,57,26A,26"          
+                        numbers: "131,131B,127,123,62,60,60A,121,119,117,58,56,54,109,107,105,52,50,103,101,99,97,48,46,95,93,91,44,89,87,85,81,79,38,36,34,69,67,65,32,30A,30,28,59A,59,57,26A,26,24"          
                     },
                     {
                         street: "Albergerweg",
-                        numbers: ""          
+                        numbers: "4,10,5,7,9,12,14,16,11,18,18A,20,13,15,15A"          
                     },
                 ],
             },
+            {
+                desc: "Hoofdstraat & Albergerweg",
+                parts: [  
+                    {
+                        street: "Hoofdstraat",
+                        numbers: "131,131B,127,123,62,60,60A,121,119,117,58,56,54,109,107,105,52,50,103,101,99,97,48,46,95,93,91,44,89,87,85,81,79,38,36,34,69,67,65,32,30A,30,28,59A,59,57,26A,26,24"          
+                    },
+                    {
+                        street: "Albergerweg",
+                        numbers: "4,10,5,7,9,12,14,16,11,18,18A,20,13"          
+                    },
+                ],
+            },
+            {
+                desc: "Albergerweg & Prinsenweg",
+                parts: [  
+                    {
+                        street: "Albergerweg",
+                        numbers: "15,15A"          
+                    },
+                    {
+                        street: "Prinsenweg",
+                        numbers: "2..10,7,9,12,14"          
+                    },
+                ],
+            },
+            {
+                desc: "Sint Stephanusstraat & Oude Kerkweg",
+                parts: [
+                    {
+                        street: "Sint Stephanusstraat",
+                        numbers: "3,10,8,6,5,1",
+                    },
+                    {
+                        street: "Oude Kerkweg",
+                        numbers: "6,4,2",
+                    },
+                ],
+            },
+            {
+                desc: "Hoofdstraat & Lidwinaweg",
+                parts: [
+                    {
+                        street: "Hoofdstraat",
+                        numbers: "18,18A,20,55A,55,53,51,49,47,45,43",
+                    },
+                    {
+                        street: "Lidwinaweg",
+                        numbers: "2,2A,2B,4,6,1A,1",
+                    },
+                ],
+            },
+            {
+                desc: "Hoofdstraat & Boumanslaan",
+                parts: [
+                    {
+                        street: "Hoofdstraat",
+                        numbers: "41A,41,14,12,39A,39,6,6A,6B",
+                    },
+                    {
+                        street: "Boumanslaan",
+                        numbers: "1",
+                    },
+                ],
+            },
+            {
+                desc: "Boumanslaan & Patersbos",
+                parts: [
+                    {
+                        street: "Patersbos",
+                        numbers: "26..2",
+                    },
+                    {
+                        street: "Boumanslaan",
+                        numbers: "18,20,22",
+                    },
+                ],
+            },
+            {
+                desc: "Hoofdstraat & Hertmerweg",
+                parts: [
+                    {
+                        street: "Hoofdstraat",
+                        numbers: "31..1",
+                    },
+                    {
+                        street: "Hertmerweg",
+                        numbers: "46,44,42A,42B,42C,42D",
+                    },
+                ],
+            },
+            {
+                desc: "Hertmerweg & Karmelhof",
+                parts: [
+                    {
+                        street: "Karmelhof",
+                        numbers: "1,2,3,4,5,6,7,8,9,11,13,15",
+                    },
+                    {
+                        street: "Hertmerweg",
+                        numbers: "42,40,38",
+                    },
+                ],
+            },
+            {
+                desc: "Hertmerweg & Karmelhof",
+                parts: [
+                    {
+                        street: "Karmelhof",
+                        numbers: "1,2,3,4,5,6,7,8,9,11,13,15",
+                    },
+                    {
+                        street: "Hertmerweg",
+                        numbers: "42,40,38,45,45A",
+                    },
+                ],
+            },
+            {
+                desc: "Zenderensestraat",
+                parts: [
+                    {
+                        street: "Zenderensestraat",
+                        numbers: "9,7,5,3",
+                    },
+                ],
+            },
+            {
+                desc: "Esweg & Meester Thienweg",
+                parts: [
+                    {
+                        street: "Esweg",
+                        numbers: "8,6,4,2",
+                    },
+                    {
+                        street: "Meester Thienweg",
+                        numbers: "3,6,4,1",
+                    },
+                ],
+            },
+            {
+                desc: "Loodijk & Oonksweg",
+                parts: [
+                    {
+                        street: "Loodijk",
+                        numbers: "2,1A,1",
+                    },
+                    {
+                        street: "Oonksweg",
+                        numbers: "50,42",
+                    },
+                ],
+            },
+            //...
         ],
     },
 ];
