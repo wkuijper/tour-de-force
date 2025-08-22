@@ -339,19 +339,68 @@ const tours = [
                 ],
             },
             {
-                desc: "Lidwinaweg & Esweg",
+                desc: "Lidwinaweg & Zeilkerweg",
                 parts: [  
                     {
                         street: "Lidwinaweg",
-                        numbers: "50"          
+                        numbers: "25,25A,44,44A,46,46A,23,23A,23B,21,21A,19,17A,17,2,15A,15,13A,13,11,9,7,5B,5A,5,3,8..34,40,42"          
                     },
                     {
-                        street: "Esweg",
-                        numbers: "8"          
+                        street: "Zeilkerweg",
+                        numbers: "1,1A,8"          
+                    },
+                ],
+            },
+            {
+                desc: "Zeilkerweg & Reefsweg",
+                parts: [  
+                    {
+                        street: "Reefsweg",
+                        numbers: "7"          
                     },
                     {
-                        street: "Lidwinaweg",
-                        numbers: "27"          
+                        street: "Zeilkerweg",
+                        numbers: "10,12"          
+                    },
+                ],
+            },
+            {
+                desc: "Grintkolkenweg",
+                parts: [  
+                    {
+                        street: "Grintkolkenweg",
+                        numbers: "1,2"          
+                    },
+                ],
+            },
+            {
+                desc: "Brakeweg",
+                parts: [  
+                    {
+                        street: "Brakeweg",
+                        numbers: "12,2,2A,1"          
+                    },
+                ],
+            },
+            {
+                desc: "Elhorsterweg",
+                parts: [  
+                    {
+                        street: "Elhorsterweg",
+                        numbers: "2,2A,4,4A,6,8,10,5,3"          
+                    },
+                ],
+            },
+            {
+                desc: "Hoofdstraat & Albergerweg",
+                parts: [  
+                    {
+                        street: "Hoofdstraat",
+                        numbers: "131,131B,127,123,62,60,60A,121,119,117,58,56,54,109,107,105,52,50,103,101,99,97,48,46,95,93,91,44,89,87,85,81,79,38,36,34,69,67,65,32,30A,30,28,59A,59,57,26A,26"          
+                    },
+                    {
+                        street: "Albergerweg",
+                        numbers: ""          
                     },
                 ],
             },
