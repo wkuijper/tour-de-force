@@ -1,4 +1,4 @@
-export const segments = [
+export const segmentDefs = [
     {
         officialSegment: "ZENDEREN LR (57604104)",
         segment: "Zenderen LR",
@@ -218,7 +218,7 @@ export const segments = [
                 street: "Karmelhof",
                 town: "Zenderen",
                 numbers: [
-                    "  11   | TT HE"
+                    "  11   | TT HE",
                     "  13   | TEL",
                     "  13   | TT HE",
                     "  13   | TT HE",
@@ -228,7 +228,7 @@ export const segments = [
                 street: "Elhorsterweg",
                 town: "Zenderen",
                 numbers: [
-                    "   4   | TT HE"
+                    "   4   | TT HE",
                     "   5   | TT HE",
                     "   8   | TT AM",
                 ],
@@ -237,7 +237,7 @@ export const segments = [
                 street: "Hertmerweg", 
                 town: "Zenderen",
                 numbers: [
-                    "  40   | TT HE"
+                    "  40   | TT HE",
                     "  46   | TR    | Kuil",
                     "  46   | TR    | Karmeliet...",
                     "  46   | TT HE | Paters Ca...",
@@ -301,9 +301,10 @@ export const segments = [
     },
 ];
 
-const tours = [
+const tourDefs = [
     {
-        tour: "Dubbele Pannenkoek",
+        tour: "Doordeweekse Pannenkoek",
+        days: "MDWDVzz",
         segments: [
             "Zenderen LR",
             "Borne West 41",
@@ -688,4 +689,13 @@ const tours = [
             },
         ],
     },
+    /*{
+        tour: "Weekend Pannenkoek",
+        days: "mdwdvZz",
+        segments: [
+            "Zenderen LR",
+            "Borne West 41",
+        ],
+        // TODO
+    }*/
 ];
