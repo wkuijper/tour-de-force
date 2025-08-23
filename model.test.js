@@ -512,6 +512,9 @@ export function testTourDeForce(report) {
 		outputLine(`  ========================================`)
 		outputLine(`  ${legDeForce.desc}:`);
 		for (const partDeForce of legDeForce.allPartsDeForce()) {
+			if (partDeForce.numberOfAddresses <= 0) {
+				continue;
+			}
 			outputLine(`    ----------------------------------------`)
 			if (partDeForce.townIsNecessary) {
 				outputLine(`    ${partDeForce.street}, ${partDeForce.town}:`)
@@ -523,13 +526,16 @@ export function testTourDeForce(report) {
 				const indent = "      ";
 				let line = indent;
 				line += unstemmedAndAlignedStreetNumber;
-				for (const itemDeForce of numberDeForce.allItemsDeForce()) {
-					line += `${itemDeForce.officialCode}`;
+				for (const itemDeForce of numberDeForce.activeItemsDeForce()) {
+					line += ` ${itemDeForce.officialCode}`;
 					if (itemDeForce.filteredNumQty < 1 || itemDeForce.filteredNumQty > 1) {
 						line += ` (${itemDeForce.filteredNumQty}x)`;
 					}
-					for (const remark of itemDeForce.unfilteredRemarks) {
+					for (const remark of itemDeForce.filteredRemarks) {
 						line += " | " + remark; 
+					}
+					for (const remark of itemDeForce.passiveRemarks) {
+						line += " |-" + remark; 
 					}
 					if (itemDeForce.days !== null) {
 						line += " | " + itemDeForce.days;
@@ -538,11 +544,29 @@ export function testTourDeForce(report) {
 					line = indent;
 					line += "        ";
 				}
-				
-				
-				
+				for (const itemDeForce of numberDeForce.passiveItemsDeForce()) {
+					line += `-${itemDeForce.officialCode}`;
+					if (itemDeForce.filteredNumQty < 1 || itemDeForce.filteredNumQty > 1) {
+						line += ` (${itemDeForce.filteredNumQty}x)`;
+					}
+					for (const remark of itemDeForce.filteredRemarks) {
+						line += " | " + remark; 
+					}
+					for (const remark of itemDeForce.passiveRemarks) {
+						line += " |-" + remark; 
+					}
+					if (itemDeForce.days !== null) {
+						line += " | " + itemDeForce.days;
+					}
+					outputLine(line);
+					line = indent;
+					line += "        ";
+				}
 			}
 		}
 	}
-	
+
+	for (const [officialCode, count] of tourDeForce.filteredItemCounts()) {
+		outputLine(`${officialCode}: ${count}`);		
+	}
 }

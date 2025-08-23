@@ -247,18 +247,23 @@ export class ItemInfo {
     get name() {
         return this.__name;
     }
+  
+    get order() {
+        return this.__order;
+    }
     
     constructor(parent, itemDef) {
         this.__parent = parent;
         const {
             officialCode,
             name,
+            order,
         } = itemDef;
         this.__officialCode = officialCode;
         this.__name = name;
+        this.__order = order;
         parent._declareItemInfo(officialCode, name, this);
   }
-    
 }
 
 export class Segments {
@@ -397,21 +402,21 @@ export class Address {
         this.__street = street;
         this.__number = number;
         this.__town = town;
-        this.__itemSet = new Set();
+        this.__itemList = [];
         this.__dayBits = 0;
     }
 
     addItem(officialCode, remark, days, qty) {
-        const item = new Item(this, officialCode, remark, days, qty);
+        const item = new Item(this, officialCode, remark, days, qty, this.__itemList.length);
         this.__dayBits |= item.dayBits;
     }
 
     _declareItem(item) {
-        this.__itemSet.add(item);
+        this.__itemList.push(item);
     }
 
     allItems() {
-        return this.__itemSet.values();
+        return this.__itemList.values();
     }
 }
 
@@ -441,11 +446,15 @@ export class Item {
         return this.__qty;
     }
 
+    get order() {
+        return this.__order;
+    }
+    
     get numQty() {
         return this.__numQty;
     }
     
-    constructor(address, officialCode, remark, days, qty) {
+    constructor(address, officialCode, remark, days, qty, order) {
         const itemInfos = address.segment.segments.itemInfos;
         const itemInfo = itemInfos.forOfficialCode(officialCode);
         this.__address = address;
@@ -455,6 +464,7 @@ export class Item {
         this.__days = days;
         this.__dayBits = parseDayBits(days ?? "MDWDVZZ");
         this.__qty = qty;
+        this.__order = order;
         this.__numQty = parseNumQty(qty ?? "1");
         address._declareItem(this);
     }
@@ -842,8 +852,13 @@ export class TourDeForce {
     get tour() {
         return this.__tour;
     }
+
+    filteredItemCounts() {
+        return this.__filteredItemCountMap.entries();
+    }
     
     constructor(tour, days) {
+        this.__filteredItemCountMap = new Map();
         this.__tour = tour;
         this.__days = days;
         const dayBits = parseDayBits(days);
@@ -902,6 +917,15 @@ export class TourDeForce {
     allLegsDeForce() {
         return this.__legsDeForce.values();
     }
+
+    _increaseFilteredItemCount(officialCode, additionalCount) {
+        if (!this.__filteredItemCountMap.has(officialCode)) {
+            this.__filteredItemCountMap.set(officialCode, 0);
+        }
+        const prevCount = this.__filteredItemCountMap.get(officialCode);
+        const nextCount = prevCount + additionalCount;
+        this.__filteredItemCountMap.set(officialCode, nextCount);
+    }
 }
 
 export class LegDeForce {
@@ -919,6 +943,7 @@ export class LegDeForce {
     }
     
     constructor(tourDeForce, leg) {
+        this.__filteredItemCountMap = new Map();
         this.__tourDeForce = tourDeForce;
         this.__leg = leg;
 
@@ -932,6 +957,16 @@ export class LegDeForce {
 
     allPartsDeForce() {
         return this.__partsDeForce.values();
+    }
+    
+    _increaseFilteredItemCount(officialCode, additionalCount) {
+        if (!this.__filteredItemCountMap.has(officialCode)) {
+            this.__filteredItemCountMap.set(officialCode, 0);
+        }
+        const prevCount = this.__filteredItemCountMap.get(officialCode);
+        const nextCount = prevCount + additionalCount;
+        this.__filteredItemCountMap.set(officialCode, nextCount);
+        this.__tourDeForce._increaseFilteredItemCount(officialCode, additionalCount);
     }
 }
 
@@ -956,8 +991,13 @@ export class PartDeForce {
     get townIsNecessary() {
         return this.__streetPart.townIsNecessary;
     }
+
+    get numberOfAddresses() {
+        return this.__numbersDeForce.length;
+    }
     
     constructor(legDeForce, streetPart) {
+        this.__filteredItemCountMap = new Map();
         this.__legDeForce = legDeForce;
         this.__streetPart = streetPart;
 
@@ -976,6 +1016,16 @@ export class PartDeForce {
 
     allNumbersDeForce() {
         return this.__numbersDeForce.values();
+    }
+    
+    _increaseFilteredItemCount(officialCode, additionalCount) {
+        if (!this.__filteredItemCountMap.has(officialCode)) {
+            this.__filteredItemCountMap.set(officialCode, 0);
+        }
+        const prevCount = this.__filteredItemCountMap.get(officialCode);
+        const nextCount = prevCount + additionalCount;
+        this.__filteredItemCountMap.set(officialCode, nextCount);
+        this.__legDeForce._increaseFilteredItemCount(officialCode, additionalCount);
     }
 }
 
@@ -1014,6 +1064,7 @@ export class NumberDeForce {
     }
     
     constructor(partDeForce, streetPartNumber, address) {
+        this.__filteredItemCountMap = new Map();
         this.__partDeForce = partDeForce;
         this.__streetPartNumber = streetPartNumber;
         this.__address = address;
@@ -1034,10 +1085,48 @@ export class NumberDeForce {
         }
 
         this.__itemDeForceMap = itemDeForceMap;
+
+        const itemDeForceList = [...itemDeForceMap.values()];
+        if (itemDeForceList.length > 1) {
+            itemDeForceList.sort((a, b) => a.info.order - b.info.order);
+        }
+        
+        this.__itemDeForceList = itemDeForceList;
+
+        const activeItemDeForceList = [];
+        const passiveItemDeForceList = [];
+        for (const itemDeForce of itemDeForceList) {
+            if (itemDeForce.filteredNumQty <= 0) {
+                passiveItemDeForceList.push(itemDeForce);
+            } else {
+                activeItemDeForceList.push(itemDeForce);
+            }
+        }
+
+        this.__passiveItemDeForceList = passiveItemDeForceList;
+        this.__activeItemDeForceList = activeItemDeForceList;
     }
 
     allItemsDeForce() {
-        return this.__itemDeForceMap.values();
+        return this.__itemDeForceList.values();
+    }
+  
+    passiveItemsDeForce() {
+        return this.__passiveItemDeForceList.values();
+    }
+    
+    activeItemsDeForce() {
+        return this.__activeItemDeForceList.values();
+    }
+
+    _increaseFilteredItemCount(officialCode, additionalCount) {
+        if (!this.__filteredItemCountMap.has(officialCode)) {
+            this.__filteredItemCountMap.set(officialCode, 0);
+        }
+        const prevCount = this.__filteredItemCountMap.get(officialCode);
+        const nextCount = prevCount + additionalCount;
+        this.__filteredItemCountMap.set(officialCode, nextCount);
+        this.__partDeForce._increaseFilteredItemCount(officialCode, additionalCount);
     }
 }
 
@@ -1055,6 +1144,10 @@ export class ItemDeForce {
         return this.__filteredItemList.values();
     }
 
+    passiveItems() {
+        return this.__passiveItemList.values();
+    }
+
     get officialCode() {
         return this.__officialCode;
     }
@@ -1065,6 +1158,10 @@ export class ItemDeForce {
     
     get filteredRemarks() {
         return this.__filteredRemarks.values();
+    }
+    
+    get passiveRemarks() {
+        return this.__passiveRemarks.values();
     }
 
     get filteredNumQty() {
@@ -1089,6 +1186,11 @@ export class ItemDeForce {
     
     constructor(numberDeForce, itemList) {
         this.__numberDeForce = numberDeForce;
+
+        if (itemList.length > 1) {
+            itemList.sort((a, b) => a.order - b.order);
+        }
+        
         this.__itemList = itemList;
         
         const firstItem = itemList[0];
@@ -1119,13 +1221,17 @@ export class ItemDeForce {
         this.__unfilteredNumQty = unfilteredNumQty;
         
         const filteredItemList = [];
+        const passiveItemList = [];
+        
         for (const item of itemList) {
             if ((item.dayBits & tourDayBits) === 0) {
-                continue;
+                passiveItemList.push(item);
+            } else {
+                filteredItemList.push(item);
             }
-            filteredItemList.push(item);
         }
 
+        this.__passiveItemList = passiveItemList;
         this.__filteredItemList = filteredItemList;
         
         const filteredRemarks = [];
@@ -1141,5 +1247,23 @@ export class ItemDeForce {
 
         this.__filteredRemarks = filteredRemarks;
         this.__filteredNumQty = filteredNumQty;
+
+
+
+        const passiveRemarks = [];
+        let passiveNumQty = 0;
+
+        for (const passiveItem of passiveItemList) {
+            const passiveRemark = passiveItem.remark;
+            if (passiveRemark !== null) {
+                passiveRemarks.push(passiveRemark);
+            } 
+            passiveNumQty += passiveItem.numQty;
+        }
+
+        this.__passiveRemarks = passiveRemarks;
+        this.__passiveNumQty = passiveNumQty;
+
+        this.__numberDeForce._increaseFilteredItemCount(this.__officialCode, filteredNumQty);
     }
 }
