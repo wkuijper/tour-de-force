@@ -268,7 +268,7 @@ export const segmentDefs = [
                 street: "Hanzestraat",
                 town: "Borne",
                 numbers: [
-                    "  21   | HFD | Kok | MDWDVz",
+                    "  21   | HFD | Kok | MDWDVzz",
                     "  21   | TEL | Senator BE Kok",
                     "  37   | TT HE",
                 ],

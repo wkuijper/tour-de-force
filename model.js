@@ -12,6 +12,35 @@ export function stemStreetNumber(streetNumber) {
     return stemmed;
 }
 
+const stemmedStreetNumberRegExp = new RegExp("^([1-9][0-9]*)([A-Z])?$");
+
+export function unstemAndAlignStreetNumber(stemmedStreetNumber, numericPartWidth, interSpacing, alphanumericPartWidth) {
+    const match = stemmedStreetNumberRegExp.exec(stemmedStreetNumber);
+    if (match === null) {
+        throw new Error(`can't unstem this street number: ${stemmedStreetNumber}`)
+    }
+    const numericPart = match[1];
+    const optionalAlphanumericPart = match[2] ?? "";
+    const numericPartLength = numericPart.length;
+    const indent = Math.max(0, numericPartWidth - numericPartLength);
+    const unstemmedParts = [];
+    for (let i = 0; i < indent; i++) {
+        unstemmedParts.push(" ");
+    }
+    unstemmedParts.push(numericPart);
+    for (let i = 0; i < interSpacing; i++) {
+        unstemmedParts.push(" ");
+    }
+    const alphanumericPartLength = optionalAlphanumericPart.length;
+    const outdent = Math.max(0, alphanumericPartWidth - alphanumericPartLength);
+    unstemmedParts.push(optionalAlphanumericPart);
+    for (let i = 0; i < outdent; i++) {
+        unstemmedParts.push(" ");
+    }
+    const unstemmedStreetNumber = unstemmedParts.join("");
+    return unstemmedStreetNumber;
+}
+
 export function stemTownName(town) {
     const townParts = town.split(" ");
     const numberOfTownParts = townParts.length;
@@ -125,6 +154,48 @@ export function unparseDayBits(bits) {
         letters[6] = "Z";
     }
     return letters.join("");
+}
+
+const qtyRegExp = new RegExp("^([0-9][0-9]*)$");
+
+export function parseNumQty(qty) {
+    const match = qtyRegExp.exec(qty);
+    if (match === null) {
+        throw new Error(`can't parse quantity: ${qty}`)
+    }
+    const numQty = parseInt(qty, 10);
+    if (numQty === 0) {
+        throw new Error(`quantity is zero`);
+    }
+    if (numQty > (1 << 30)) {
+        throw new Error(`quantity is too large: ${qty}`);
+    }
+    return numQty;
+}
+
+const purelyDecimalStreetNumberRegExp = new RegExp("^([0-9][0-9]*)$");
+
+export function parsePurelyDecimalStreetNumber(streetNumberStr) {
+    const match = purelyDecimalStreetNumberRegExp.exec(streetNumberStr);
+    if (match === null) {
+        throw new Error(`can't parse purely decimal street number: ${streetNumberStr}`)
+    }
+    const streetNumber = parseInt(streetNumberStr, 10);
+    if (streetNumber === 0) {
+        throw new Error(`street number is zero`);
+    }
+    if (streetNumber > (1 << 30)) {
+        throw new Error(`street number is too large: ${streetNumberStr}`);
+    }
+    return streetNumber;
+}
+
+export function validateStemmedStreetNumber(streetNumberStr) {
+    const match = stemmedStreetNumberRegExp.exec(streetNumberStr);
+    if (match === null) {
+        throw new Error(`street number must be non-zero and stemmed: ${streetNumberStr}`)
+    }
+    return streetNumberStr;
 }
 
 export class ItemInfos {
@@ -252,7 +323,7 @@ export class Segment {
         this.__segments = segments;
         this.__officialName = officialSegment;
         this.__name = segment;
-        this.__addressMap = new Map();
+        this.__addressLineToAddressMap = new Map();
         segments._declareSegment(officialSegment, segment, this);
         for (const streetDef of streets) {
             this.__parseStreet(streetDef);
@@ -278,18 +349,18 @@ export class Segment {
     }
 
     allAddresses() {
-        return this.__addressMap.values();
+        return this.__addressLineToAddressMap.values();
     }
 
     __getOrDeclareAddress(street, unstemmedNumber, unstemmedTown) {
         const number = stemStreetNumber(unstemmedNumber);
         const town = stemTownName(unstemmedTown);
         const addressLine = `${street} ${number}, ${town}`;
-        if (!this.__addressMap.has(addressLine)) {
+        if (!this.__addressLineToAddressMap.has(addressLine)) {
             const address = new Address(this, addressLine, street, number, town);
-            this.__addressMap.set(addressLine, address);
+            this.__addressLineToAddressMap.set(addressLine, address);
         }
-        return this.__addressMap.get(addressLine);
+        return this.__addressLineToAddressMap.get(addressLine);
     }
 
 }
@@ -315,6 +386,10 @@ export class Address {
     get town() {
         return this.__town;
     }
+
+    get dayBits() {
+        return this.__dayBits;
+    }
     
     constructor(segment, line, street, number, town) {
         this.__segment = segment;
@@ -322,22 +397,21 @@ export class Address {
         this.__street = street;
         this.__number = number;
         this.__town = town;
-        this.__itemMap = new Map();
+        this.__itemSet = new Set();
+        this.__dayBits = 0;
     }
 
     addItem(officialCode, remark, days, qty) {
         const item = new Item(this, officialCode, remark, days, qty);
+        this.__dayBits |= item.dayBits;
     }
 
     _declareItem(item) {
-        if (this.__itemMap.has(item.officialCode)) {
-            throw new Error(`duplicate item for address: ${this.line}: ${item.officialCode}`);
-        }
-        this.__itemMap.set(item.officialCode, item);
+        this.__itemSet.add(item);
     }
 
     allItems() {
-        return this.__itemMap.values();
+        return this.__itemSet.values();
     }
 }
 
@@ -352,15 +426,23 @@ export class Item {
     }
     
     get remark() {
-        return this.__remark ?? "";
+        return this.__remark;
     }
     
     get days() {
-        return this.__days ?? "MDWDVZZ";
+        return this.__days;
+    }
+    
+    get dayBits() {
+        return this.__dayBits;
     }
     
     get qty() {
-        return this.__qty ?? 1;
+        return this.__qty;
+    }
+
+    get numQty() {
+        return this.__numQty;
     }
     
     constructor(address, officialCode, remark, days, qty) {
@@ -371,32 +453,693 @@ export class Item {
         this.__info = itemInfo;
         this.__remark = remark;
         this.__days = days;
+        this.__dayBits = parseDayBits(days ?? "MDWDVZZ");
         this.__qty = qty;
+        this.__numQty = parseNumQty(qty ?? "1");
         address._declareItem(this);
     }
 }
 
 export class Tours {
 
-    constructor(segments, tourDefs) {
-        
+    get segments() {
+        return this.__segments;
     }
     
+    constructor(segments, tourDefs) {
+        this.__segments = segments;
+        this.__tourNameMap = new Map();
+        for (const tourDef of tourDefs) {
+            const tour = new Tour(this, tourDef);
+        } 
+    }
+
+    _declareTour(tour) {
+        if (this.__tourNameMap.has(tour.name)) {
+            throw new Error(`duplicate tour name: ${tour.name}`);
+        }
+        this.__tourNameMap.set(tour.name, tour);
+    }
+
+    all() {
+        return this.__tourNameMap.values();
+    }
+    
+    forName(name) {
+        return this.__tourNameMap.get(name);
+    }
 }
 
 export class Tour {
 
-    constructor(parent, tourDef) {
+    get name() {
+        return this.__name;
+    }
+
+    get dayBits() {
+        return this.__dayBits;
+    }
+    
+    path() {
+         return this.name;   
+    }
+    
+    get tours() {
+        return this.__tours;    
+    }
+    
+    constructor(tours, tourDef) {
+        this.__tours = tours;
+        const {
+            tour,
+            days,
+            segments,
+            towns,
+            legs,
+        } = tourDef;
+        this.__name = tour;
+        this.__days = days;
+        this.__dayBits = parseDayBits(days);
         
+        this.__usedSegments = segments.map((name) => tours.segments.forName(name));
+
+        this.__addressLineToStreetPartNumberMap = new Map();
+        
+        this.__townToStreetsMap = new Map();
+        this.__streetToTownMap = new Map();
+
+        if (towns === undefined) {
+            throw new Error(`missing towns in: ${this.path()}`);
+        }
+        for (const townDef of towns) {
+            const {
+                town,
+                streets,
+            } = townDef;
+            if (town === undefined) {
+                throw new Error(`missing town in: ${this.path()}`);
+            }
+            if (streets === undefined) {
+                throw new Error(`missing streets in: ${this.path()}: town: ${town}`);
+            }
+            if (this.__townToStreetsMap.has(town)) {
+                throw new Error(`duplicate town in: ${this.path()}: town: ${town}`);
+            }
+            const streetSet = new Set();
+            for (const street of streets) {
+                if (streetSet.has(street)) {
+                    throw new Error(`duplicate street in: ${this.path()}: town: ${town}: street: ${street}`);
+                }
+                streetSet.add(street);
+            }
+            this.__townToStreetsMap.set(town, streets);
+            for (const street of streetSet) {
+                if (this.__streetToTownMap.has(street)) {
+                    this.__streetToTownMap.set(street, null);
+                } else {
+                    this.__streetToTownMap.set(street, town);
+                }
+            }
+        }
+        
+        this.__legs = legs.map((legDef, index) => this.__parseLeg(legDef, index));
+        tours._declareTour(this);
+    }
+
+    __parseLeg(legDef, index) {
+        return new Leg(this, legDef, index);
+    }
+
+    townForStreet(street) {
+        const town = this.__streetToTownMap.get(street);
+        if (town === undefined) {
+            throw new Error(`undeclared street in: ${this.path()}: street: ${street}`);
+        }
+        if (town === null) {
+            throw new Error(`ambiguous town for street in: ${this.path()}: street: ${street}`);
+        }
+        return town;
+    }
+    
+    checkStreetAndTown(street, town) {
+        const streets = this.__townToStreetsMap.get(town);
+        if (streets === undefined || !streets.has(street)) {
+            throw new Error(`undeclared street/town in: ${this.path()}: street: ${street}: town: ${town}`);
+        }
+        return this.__streetToTownMap.get(street) === town;
+    }
+
+    _declareStreetPartNumber(streetPartNumber) {
+        const addressLine = streetPartNumber.addressLine;
+        if (this.__addressLineToStreetPartNumberMap.has(addressLine)) {
+            const existingStreetPartNumber = this.__addressLineToStreetPartNumberMap.get(addressLine);
+            throw new Error(`duplicate address in tour: ${addressLine}: first path: ${streetPartNumber.path()}: second path: ${existingStreetPartNumber.path()}`);
+        }
+        this.__addressLineToStreetPartNumberMap.set(addressLine, streetPartNumber);
+    }
+
+    allLegs() {
+        return this.__legs.values();
+    }
+
+    usedSegments() {
+        return this.__usedSegments.values();
+    }
+
+    streetPartNumberForAddressLine(addressLine) {
+        return this.__addressLineToStreetPartNumberMap.get(addressLine);
+    }
+}
+
+export class Leg {
+
+    get tour() {
+        return this.__tour;
+    }
+
+    get index() {
+        return this.__index;
+    }
+
+    get desc() {
+        return this.__desc;
+    }
+    
+    path() {
+        return this.tour.path() + `: leg#${this.index}`;
+    }
+    
+    constructor(tour, legDef, index) {
+        this.__tour = tour;
+        this.__index = index;
+        const {
+            desc,
+            parts,
+        } = legDef;
+        this.__desc = desc;
+        this.__streetParts = parts.map((partDef, index) => this.__parsePart(partDef, index));
+    }
+
+    __parsePart(partDef, index) {
+        return new StreetPart(this, partDef, index);
+    }
+
+    _declareStreetPartNumber(streetPartNumber) {
+        this.tour._declareStreetPartNumber(streetPartNumber);
+    }
+    
+    allStreetParts() {
+        return this.__streetParts.values();
+    }
+}
+
+export class StreetPart {
+
+    get leg() {
+        return this.__leg;
+    }
+
+    get index() {
+        return this.__index;
+    }
+
+    get street() {
+        return this.__street;
+    }
+
+    get town() {
+        return this.__town;
+    }
+
+    get townIsNecessary() {
+        return this.__townIsNecessary;
+    }
+
+    path() {
+        return this.leg.path() + `: part#${this.index}`;
+    }
+    
+    constructor(leg, partDef, index) {
+        this.__leg = leg;
+        this.__index = index;
+        const street = partDef.street;
+        if (street === undefined) {
+            throw new Error(`missing street in: ${leg.path()}: ${partDef}`);
+        }
+        let town = partDef.town;
+        if (town === undefined) {
+            town = leg.tour.townForStreet(street);
+            this.__townIsNecessary = false;
+        } else {
+            this.__townIsNecessary = leg.tour.checkStreetAndTown(street, town);
+        }
+        this.__street = street;
+        this.__town = town;
+        const numbers = partDef.numbers;
+        if (numbers === undefined) {
+            throw new Error(`missing numbers in: ${leg.path()}: ${partDef}`);
+        }
+
+        this.__streetPartNumbers = [];
+        
+        const numberOrRanges = numbers.split(",");
+        for (const numberOrRange of numberOrRanges) {
+            this.__handleStreetNumberOrRange(numberOrRange);
+        }
+    }
+
+    __handleStreetNumberOrRange(numberOrRangeStr) {
+        const rangeParts = numberOrRangeStr.split("...");
+        if (rangeParts.length > 1) {
+            if (rangeParts.length > 2) {
+                throw new Error(`malformed number range in: ${this.path()}: ${numberOrRangeStr}`);
+            }
+            const from = parsePurelyDecimalStreetNumber(rangeParts[0]);
+            const to = parsePurelyDecimalStreetNumber(rangeParts[1]);
+            if (from > to) {
+                for (let i = from; i >= to; i -= 1) {
+                    this.__handleStreetNumber(`${i}`);  
+                }
+            } else if (from < to) {
+                for (let i = from; i >= to; i += 1) {
+                    this.__handleStreetNumber(`${i}`);
+                }
+            } else if (from === to) {
+                this.__handleStreetNumber(`${from}`);
+            } else {
+                throw new Error(`malformed number range in: ${this.path()}: ${numberOrRangeStr}`);
+            }
+            return;
+        }
+        const evenOddRangeParts = numberOrRangeStr.split("..");
+        if (evenOddRangeParts.length > 1) {
+            if (evenOddRangeParts.length > 2) {
+                throw new Error(`malformed even/odd number range in: ${this.path()}: ${numberOrRangeStr}`);
+            }
+            const from = parsePurelyDecimalStreetNumber(evenOddRangeParts[0]);
+            const to = parsePurelyDecimalStreetNumber(evenOddRangeParts[1]);
+            if (from % 2 === to % 2) {
+                // both even or both odd
+                if (from > to) {
+                    for (let i = from; i >= to; i -= 2) {
+                        this.__handleStreetNumber(`${i}`);  
+                    }
+                } else if (from < to) {
+                    for (let i = from; i >= to; i += 2) {
+                        this.__handleStreetNumber(`${i}`);
+                    }
+                } else if (from === to) {
+                    this.__handleStreetNumber(`${from}`);
+                } else {
+                    throw new Error(`malformed number range in: ${this.path()}: ${numberOrRangeStr}`);
+                }
+            } else {
+                throw new Error(`even/odd number range mixes even/odd endpoints: fix endpoints or use ... instead in: ${this.path()}: ${numberOrRange}`);
+            }
+            return;
+        }
+        this.__handleStreetNumber(numberOrRangeStr);
+    }
+
+    __handleStreetNumber(numberStr) {
+        const streetPartNumber = new StreetPartNumber(this, numberStr, this.__streetPartNumbers.length); 
+        this.__streetPartNumbers.push(streetPartNumber);
+    }
+
+    _declareStreetPartNumber(streetPartNumber) {
+        this.leg._declareStreetPartNumber(streetPartNumber);
+    }
+
+    allStreetPartNumbers() {
+        return this.__streetPartNumbers.values();
+    }
+}
+
+export class StreetPartNumber {
+
+    get streetPart() {
+        return this.__streetPart;
+    }
+
+    get number() {
+        return this.__number;
+    }
+
+    get index() {
+        return this.__index;
+    }
+
+    get street() {
+        return this.__street;   
+    }
+
+    get town() {
+        return this.__town;
+    }
+
+    get townIsNecessary() {
+        return this.__streetPart.townIsNecessary;
+    }
+    
+    get addressLine() {
+        return this.__addressLine;
+    }
+    
+    path() {
+        return this.streetPart.leg.path() + `: #${this.index}`;
+    }
+    
+    constructor(streetPart, number, index) {
+        this.__streetPart = streetPart;
+        try {
+            validateStemmedStreetNumber(number);
+        } catch (err) {
+            throw new Error(`malformed street number in: ${this.path()}: ${err.toString()}`);
+        }
+        this.__number = number;
+        this.__index = index;
+
+        const street = streetPart.street;
+        this.__street = street;
+
+        const town = streetPart.town;
+        this.__town = town;
+        
+        const addressLine = `${street} ${number}, ${town}`;
+        this.__addressLine = addressLine;
+
+        streetPart._declareStreetPartNumber(this);
     }
     
 }
 
-export class DeForce {
+export class TourDeForce {
 
-    constructor(tour) {
-        
+    get dayBits() {
+        return this.__dayBits;
     }
     
+    get tour() {
+        return this.__tour;
+    }
+    
+    constructor(tour, days) {
+        this.__tour = tour;
+        this.__days = days;
+        const dayBits = parseDayBits(days);
+        this.__dayBits = dayBits;
+        
+        const addressLineToAddressMap = new Map();
+        this.__addressLineToAddressMap = addressLineToAddressMap;
+
+        for (const segment of tour.usedSegments()) {
+            for (const address of segment.allAddresses()) {
+                const addressLine = address.line;
+                if (addressLineToAddressMap.has(addressLine)) {
+                    const existsingAddress = addressLineToAddressMap.get(addressLine);
+                    const existingSegment = existingAddress.segment;
+                    throw new Error(`ambiguous address occuring in more than one segment: ${addressLine}: first segment: ${segment.name}: second segment: ${existingSegment.name}`);
+                }
+                addressLineToAddressMap.set(addressLine, address);
+            }
+        }
+
+        const addressToStreetPartNumberMap = new Map();
+        const streetPartNumberToAddressMap = new Map();
+        const unassignedAddresses = [];
+
+        for (const [addressLine, address] of addressLineToAddressMap.entries()) {
+            const streetPartNumber = tour.streetPartNumberForAddressLine(addressLine);
+            if (streetPartNumber === undefined) {
+                unassignedAddresses.push(address);
+            } else {
+                addressToStreetPartNumberMap.set(address, streetPartNumber);
+                streetPartNumberToAddressMap.set(streetPartNumber, address);
+            }
+        }
+        
+        this.__addressToStreetPartNumberMap = addressToStreetPartNumberMap;
+        this.__streetPartNumberToAddressMap = streetPartNumberToAddressMap;
+        this.__unassignedAddresses = unassignedAddresses;
+
+        const legsDeForce = [];
+        for (const leg of tour.allLegs()) {
+            const legDeForce = new LegDeForce(this, leg);
+            legsDeForce.push(legDeForce);
+        }
+
+        this.__legsDeForce = legsDeForce;
+    }
+
+    allUnassignedAddresses() {
+        return this.__unassignedAddresses.values();
+    }
+
+    addressForStreetPartNumber(streetPartNumber) {
+        return this.__streetPartNumberToAddressMap.get(streetPartNumber);
+    }
+
+    allLegsDeForce() {
+        return this.__legsDeForce.values();
+    }
 }
 
+export class LegDeForce {
+
+    get tourDeForce() {
+        return this.__tourDeForce;
+    }
+
+    get leg() {
+        return this.__leg;
+    }
+
+    get desc() {
+        return this.__leg.desc;
+    }
+    
+    constructor(tourDeForce, leg) {
+        this.__tourDeForce = tourDeForce;
+        this.__leg = leg;
+
+        const partsDeForce = [];
+        for (const streetPart of leg.allStreetParts()) {
+            const partDeForce = new PartDeForce(this, streetPart);
+            partsDeForce.push(partDeForce);
+        }
+        this.__partsDeForce = partsDeForce;
+    }
+
+    allPartsDeForce() {
+        return this.__partsDeForce.values();
+    }
+}
+
+export class PartDeForce {
+
+    get legDeForce() {
+        return this.__legDeForce;
+    }
+
+    get streetPart() {
+        return this.__streetPart;
+    }
+
+    get street() {
+        return this.__streetPart.street;
+    }
+
+    get town() {
+        return this.__streetPart.town;
+    }
+
+    get townIsNecessary() {
+        return this.__streetPart.townIsNecessary;
+    }
+    
+    constructor(legDeForce, streetPart) {
+        this.__legDeForce = legDeForce;
+        this.__streetPart = streetPart;
+
+        const numbersDeForce = [];
+        const tourDeForce = legDeForce.tourDeForce;
+        for (const streetPartNumber of streetPart.allStreetPartNumbers()) {
+            const address = tourDeForce.addressForStreetPartNumber(streetPartNumber);
+            if (address === undefined) {
+                continue;
+            }
+            const numberDeForce = new NumberDeForce(this, streetPartNumber, address);
+            numbersDeForce.push(numberDeForce);
+        }
+        this.__numbersDeForce = numbersDeForce;
+    }
+
+    allNumbersDeForce() {
+        return this.__numbersDeForce.values();
+    }
+}
+
+export class NumberDeForce {
+
+    get partDeForce() {
+        return this.__partDeForce;
+    }
+
+    get streetPartNumber() {
+        return this.__streetPartNumber;
+    }
+
+    get address() {
+        return this.__address;
+    }
+
+    get street() {
+        return this.__streetPartNumber.street;
+    }
+ 
+    get number() {
+        return this.__streetPartNumber.number;
+    }
+    
+    get town() {
+        return this.__streetPartNumber.town;
+    }
+    
+    get townIsNecessary() {
+        return this.__streetPartNumber.townIsNecessary;
+    }
+    
+    get addressLine() {
+        return this.__streetPartNumber.addressLine;
+    }
+    
+    constructor(partDeForce, streetPartNumber, address) {
+        this.__partDeForce = partDeForce;
+        this.__streetPartNumber = streetPartNumber;
+        this.__address = address;
+
+        const itemMap = new Map();
+        for (const item of address.allItems()) {
+            const officialCode = item.officialCode;
+            if (!itemMap.has(officialCode)) {
+                itemMap.set(officialCode, []);
+            }
+            itemMap.get(officialCode).push(item);
+        }
+
+        const itemDeForceMap = new Map();
+        for (const [officialCode, itemList] of itemMap.entries()) {
+            const itemDeForce = new ItemDeForce(this, itemList);
+            itemDeForceMap.set(officialCode, itemDeForce);
+        }
+
+        this.__itemDeForceMap = itemDeForceMap;
+    }
+
+    allItemsDeForce() {
+        return this.__itemDeForceMap.values();
+    }
+}
+
+export class ItemDeForce {
+
+    get numberDeForce() {
+        return this.__numberDeForce;
+    }
+
+    allItems() {
+        return this.__itemList.values();
+    }
+
+    filteredItems() {
+        return this.__filteredItemList.values();
+    }
+
+    get officialCode() {
+        return this.__officialCode;
+    }
+
+    get info() {
+        return this.__info;
+    }
+    
+    get filteredRemarks() {
+        return this.__filteredRemarks.values();
+    }
+
+    get filteredNumQty() {
+        return this.__filteredNumQty;
+    }
+
+    get unfilteredRemarks() {
+        return this.__unfilteredRemarks.values();
+    }
+
+    get unfilteredNumQty() {
+        return this.__unfilteredNumQty;
+    }
+
+    get days() {
+        return this.__days;
+    }
+
+    get dayBits() {
+        return this.__dayBits;
+    }
+    
+    constructor(numberDeForce, itemList) {
+        this.__numberDeForce = numberDeForce;
+        this.__itemList = itemList;
+        
+        const firstItem = itemList[0];
+
+        this.__officialCode = firstItem.officialCode;
+        this.__info = firstItem.info;
+        
+        const tourDeForce = numberDeForce.partDeForce.legDeForce.tourDeForce;
+        const tourDayBits = tourDeForce.dayBits;
+
+        const unfilteredRemarks = [];
+        let unfilteredNumQty = 0;
+        let dayBits = 0;
+
+        for (const item of itemList) {
+            const remark = item.remark;
+            if (remark !== null) {
+                unfilteredRemarks.push(remark);
+            } 
+            unfilteredNumQty += item.numQty;
+            dayBits |= item.dayBits;
+        }
+
+        this.__dayBits = dayBits;
+        this.__days = (dayBits === allweekBits ? null : unparseDayBits(dayBits));
+        
+        this.__unfilteredRemarks = unfilteredRemarks;
+        this.__unfilteredNumQty = unfilteredNumQty;
+        
+        const filteredItemList = [];
+        for (const item of itemList) {
+            if ((item.dayBits & tourDayBits) === 0) {
+                continue;
+            }
+            filteredItemList.push(item);
+        }
+
+        this.__filteredItemList = filteredItemList;
+        
+        const filteredRemarks = [];
+        let filteredNumQty = 0;
+
+        for (const filteredItem of filteredItemList) {
+            const filteredRemark = filteredItem.remark;
+            if (filteredRemark !== null) {
+                filteredRemarks.push(filteredRemark);
+            } 
+            filteredNumQty += filteredItem.numQty;
+        }
+
+        this.__filteredRemarks = filteredRemarks;
+        this.__filteredNumQty = filteredNumQty;
+    }
+}
