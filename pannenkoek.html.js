@@ -30,10 +30,19 @@ function tourDeForce() {
 	//	return "Are you sure?";
 	//}
 
-	document.body.ondblclick = (evt) => {
+	/*document.body.ondblclick = (evt) => {
 		evt.preventDefault();
 		if (document.body.style.background === "black") {
 			document.body.style.background = "pink";	
+		} else {
+			document.body.style.background = "black";
+		}
+	};*/
+
+	document.body.onclick = (evt) => {
+		evt.preventDefault();
+		if (document.body.style.background === "black") {
+			document.body.style.background = "green";	
 		} else {
 			document.body.style.background = "black";
 		}
