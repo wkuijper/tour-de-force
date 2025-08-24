@@ -25,10 +25,93 @@ import {
 } from "./model.js";
 
 function tourDeForce() {
+
+	//window.onbeforeunload = (evt) => {
+	//	return "Are you sure?";
+	//}
+	
+	document.body.style.font = "16pt monospace";
+
+	const controlPanelDivE = document.createElement("div");
+	document.body.appendChild(controlPanelDivE);
+	
+	const daysDropDownDivE = document.createElement("div");
+	controlPanelDivE.appendChild(daysDropDownDivE);
+	
+	daysDropDownDivE.style.marginTop = "8px";
+	daysDropDownDivE.style.marginRight = "8px";
+	daysDropDownDivE.style.marginBottom = "8px";
+	daysDropDownDivE.style.font = "16pt sans-serif";
+	
+	const daysDropDownSelectE = document.createElement("select");
+	daysDropDownDivE.appendChild(daysDropDownSelectE);
+	daysDropDownSelectE.style.font = "16pt sans-serif";
+	
+	const daysOptions = [
+		["Today", undefined],
+		["Monday", "mdwdvzz"],
+		["Tuesday", "mdwdvzz"],
+		["Wednesday", "mdwdvzz"],
+		["Thursday", "mdwdvzz"],
+		["Friday", "mdwdvzz"],
+		["Saturday", "mdwdvzz"],
+		["Sunday", "mdwdvzz"],
+		["Weekday", "MDWDVZZ"],
+		["Weekend--", "mdwdvZZ"],
+		["Weekend++", "mdwdVZZ"],
+		["Anyday", "MDWDVZZ"],
+	];
+
+	for (const [title, value] of daysOptions) {
+		const optionE = document.createElement("option");
+		daysDropDownSelectE.appendChild(optionE);
+		optionE.style.font = "16pt sans-serif";
+		optionE.innerText = title;
+		optionE.value = value;
+	}
+
+	//
+	
+	const mutationDivE = document.createElement("div");
+	controlPanelDivE.appendChild(mutationDivE);
+	
+	mutationDivE.style.marginTop = "8px";
+	mutationDivE.style.marginRight = "8px";
+	mutationDivE.style.marginBottom = "8px";
+	
+	const mutationTextAreaE = document.createElement("textarea");
+	mutationDivE.appendChild(mutationTextAreaE);
+	
+	mutationTextAreaE.style.font = "18pt sans-serif";
+	mutationTextAreaE.style.width = "100%";
+	mutationTextAreaE.rows = "4";
+	
+	//
+
+	const buttonDivE = document.createElement("div");
+	controlPanelDivE.appendChild(buttonDivE);
+	
+	const applyButtonE = document.createElement("button");
+	buttonDivE.appendChild(applyButtonE);
+
+	applyButtonE.font = "16pt sans-serif";
+	applyButtonE.style.width = "100%";
+	applyButtonE.style.height = "100px";
+	applyButtonE.innerText = "GO";
+
+	//
+	
+	const hrE = document.createElement("hr");
+	controlPanelDivE.appendChild(hrE);
+
+	controlPanelDivE.style.display = "block";
+	
+	//
+	
 	const outputLine = (line) => {
-		const pre = document.createElement("pre");
-		pre.innerText = line;
-		document.body.appendChild(pre);
+		const preE = document.createElement("pre");
+		preE.innerText = line;
+		document.body.appendChild(preE);
 	};
 	
 	const itemInfos = new ItemInfos(itemInfoDefs);
@@ -169,8 +252,8 @@ function tourDeForce() {
 				line += unstemmedAndAlignedStreetNumber;
 				for (const itemDeForce of numberDeForce.activeItemsDeForce()) {
 					line += ` ${itemDeForce.code}`;
-					if (itemDeForce.filteredNumQty < 1 || itemDeForce.filteredNumQty > 1) {
-						line += ` (${itemDeForce.filteredNumQty}x)`;
+					if (itemDeForce.activeQuantity < 1 || itemDeForce.activeQuantity > 1) {
+						line += ` (${itemDeForce.activeQuantity}x)`;
 					}
 					for (const remark of itemDeForce.activeRemarks) {
 						line += " | " + remark; 
@@ -187,8 +270,8 @@ function tourDeForce() {
 				}
 				for (const itemDeForce of numberDeForce.passiveItemsDeForce()) {
 					line += `-${itemDeForce.code}`;
-					if (itemDeForce.filteredNumQty < 1 || itemDeForce.filteredNumQty > 1) {
-						line += ` (${itemDeForce.filteredNumQty}x)`;
+					if (itemDeForce.activeQuantity < 1 || itemDeForce.activeQuantity > 1) {
+						line += ` (${itemDeForce.activeQuantity}x)`;
 					}
 					for (const remark of itemDeForce.activeRemarks) {
 						line += " | " + remark; 

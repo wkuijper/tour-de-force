@@ -632,8 +632,8 @@ export function testTourDeForce(report) {
 				line += unstemmedAndAlignedStreetNumber;
 				for (const itemDeForce of numberDeForce.activeItemsDeForce()) {
 					line += ` ${itemDeForce.code}`;
-					if (itemDeForce.filteredNumQty < 1 || itemDeForce.filteredNumQty > 1) {
-						line += ` (${itemDeForce.filteredNumQty}x)`;
+					if (itemDeForce.activeQuantity < 1 || itemDeForce.activeQuantity > 1) {
+						line += ` (${itemDeForce.activeQuantity}x)`;
 					}
 					for (const remark of itemDeForce.activeRemarks) {
 						line += " | " + remark; 
@@ -650,8 +650,8 @@ export function testTourDeForce(report) {
 				}
 				for (const itemDeForce of numberDeForce.passiveItemsDeForce()) {
 					line += `-${itemDeForce.code}`;
-					if (itemDeForce.filteredNumQty < 1 || itemDeForce.filteredNumQty > 1) {
-						line += ` (${itemDeForce.filteredNumQty}x)`;
+					if (itemDeForce.activeQuantity < 1 || itemDeForce.activeQuantity > 1) {
+						line += ` (${itemDeForce.activeQuantity}x)`;
 					}
 					for (const remark of itemDeForce.activeRemarks) {
 						line += " | " + remark; 
