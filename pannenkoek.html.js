@@ -39,30 +39,62 @@ function tourDeForce() {
 
 	const tour = tours.forName("Dubbele Pannenkoek");
 
-	const tourDeForce = new TourDeForce(tour, new Date("8/24/2025"));
+	const tourDeForce = new TourDeForce(tour, new Date("8/24/2025"), "MDWDVZZ");
 
 	outputLine(`TOUR DE FORCE`);
 	
+	outputLine(` `);
+	
 	const formattedDate = new Intl.DateTimeFormat('nl', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(tourDeForce.date);
 	
-	outputLine(`  name: ${tourDeForce.name}`);
-	outputLine(`  date: ${formattedDate}`);
-	outputLine(`  days: ${tourDeForce.days}`);
-	outputLine(`  serves:`);
+	outputLine(`  name:`);
+	outputLine(`    ${tourDeForce.name}`);
+	
+	outputLine(` `);
+	
+	outputLine(`  date:`);
+	outputLine(`     ${formattedDate}`);
+	
+	outputLine(` `);
+	
+	outputLine(`  days:`);
+	outputLine(`    ${tourDeForce.days} ${tourDeForce.dateDays !== tourDeForce.days ? `!== ${tourDeForce.dateDays}` : ``}`);
+	
+	let servedSegments = [];
+	let injectedSegments = [];
 	for (const segment of tour.servedSegments()) {
 		const officialName = segment.officialName;
 		if (officialName === null) {
-			continue;
+			injectedSegments.push(segment);
+		} else {
+			servedSegments.push(segment);
 		}
-		outputLine(`    ${officialName}`);
 	}
-	outputLine(`  injects:`);
-	for (const segment of tour.servedSegments()) {
-		const officialName = segment.officialName;
-		if (officialName !== null) {
-			continue;
+
+	if (servedSegments.length > 0) {
+		outputLine(` `);
+		outputLine(`  serves:`);
+		for (const servedSegment of servedSegments) {
+			outputLine(`    ${servedSegment.officialName}`);
 		}
-		outputLine(`    ${segment.name}`);
+	}
+	
+	if (injectedSegments.length > 0) {
+		outputLine(` `);
+		outputLine(`  injects:`);
+		for (const servedSegment of injectedSegments) {
+			outputLine(`    ${servedSegment.name}`);
+		}
+	}
+
+	outputLine(` `);	
+	
+	outputLine(`UNASSIGNED ADDRESSES`);
+	
+	outputLine(` `);
+	
+	for (const unassignedAddress of tourDeForce.unassignedAddresses()) {
+		outputLine(`  ${unassignedAddress.line}`);
 	}
 	
 	for (const batchDeForce of tourDeForce.allBatchesDeForce()) {
@@ -95,7 +127,8 @@ function tourDeForce() {
 		}
 		outputLine(` `);
 		for (const preparationNumberDeForce of batchDeForce.preparationNumbersDeForce()) {
-			let prepStr = "";
+			outputLine(`  ${preparationNumberDeForce.addressLine}:`);
+			let prepStr = "    ";
 			for (const itemDeForce of preparationNumberDeForce.allItemsDeForce()) {
 				prepStr += "[" + itemDeForce.code;
 				const quantity = itemDeForce.quantity;
@@ -104,17 +137,11 @@ function tourDeForce() {
 				}
 				prepStr += "] ";
 			}
-			outputLine(`  ${preparationNumberDeForce.addressLine}: ${prepStr}`);
+			outputLine(prepStr);
 		}
 	}
 	
 	outputLine(` `);	
-
-	for (const numberDeForce of tourDeForce.allNumbersDeForce()) {
-		if (numberDeForce.needsPreparation) {
-			console.log(numberDeForce);
-		}
-	}
 	
 	outputLine(`DELIVER`);
 	outputLine(` `);

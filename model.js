@@ -932,6 +932,10 @@ export class TourDeForce {
     get days() {
         return this.__days;
     }
+
+    get dateDays() {
+        return this.__dateDays;
+    }
     
     get dayBits() {
         return this.__dayBits;
@@ -949,7 +953,7 @@ export class TourDeForce {
         return this.__activeQuantityMap.entries();
     }
     
-    constructor(tour, date) {
+    constructor(tour, date, days) {
 
         this.__activeQuantityMap = new Map();
         this.__activeQuantity = 0;
@@ -958,25 +962,30 @@ export class TourDeForce {
         this.__date = date;
         
         const day = date.getDay();
-
-        let days = "mdwdvzz";
+        
+        let dateDays = "mdwdvzz";
         if (day === 0) {
-            days = "Mdwdvzz";
+            dateDays = "Mdwdvzz";
         } else if (day === 1) {
-            days = "mDwdvzz";
+            dateDays = "mDwdvzz";
         } else if (day === 2) {
-            days = "mdWdvzz";
+            dateDays = "mdWdvzz";
         } else if (day === 3) {
-            days = "mdwDvzz";
+            dateDays = "mdwDvzz";
         } else if (day === 4) {
-            days = "mdwdVzz";
+            dateDays = "mdwdVzz";
         } else if (day === 5) {
-            days = "mdwdvZz";
+            dateDays = "mdwdvZz";
         } else if (day === 6) {
-            days = "mdwdvzZ";
+            dateDays = "mdwdvzZ";
+        }
+
+        if (days === undefined) {
+            days = dateDays;
         }
         
         this.__days = days;
+        this.__dateDays = dateDays;
         
         const dayBits = parseDayBits(days);
         this.__dayBits = dayBits;
@@ -1065,7 +1074,7 @@ export class TourDeForce {
         this.__batchesDeForce = batches;
     }
 
-    allUnassignedAddresses() {
+    unassignedAddresses() {
         return this.__unassignedAddresses.values();
     }
 
