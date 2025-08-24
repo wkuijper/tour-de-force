@@ -41,7 +41,7 @@ function tourDeForce() {
 
 	document.body.onclick = (evt) => {
 		evt.preventDefault();
-		if (document.body.style.background === "rgb(50,50,50)") {
+		if (document.body.style.background !== "green") {
 			document.body.style.background = "green";	
 		} else {
 			document.body.style.background = "rgb(50,50,50)";
