@@ -41,16 +41,16 @@ function tourDeForce() {
 
 	document.body.onclick = (evt) => {
 		evt.preventDefault();
-		if (document.body.style.background === "black") {
+		if (document.body.style.background === "rgb(50,50,50)") {
 			document.body.style.background = "green";	
 		} else {
-			document.body.style.background = "black";
+			document.body.style.background = "rgb(50,50,50)";
 		}
 	};
 	
 	document.body.style.font = "16pt monospace";
 	document.body.style.color = "white";
-	document.body.style.background = "black";
+	document.body.style.background = "rgb(50,50,50)";
 	document.body.style.width = "720px";
 	document.body.style.marginLeft = "auto";
 	document.body.style.marginRight = "auto";
