@@ -31,6 +31,7 @@ function tourDeForce() {
 	//}
 
 	document.body.ondblclick = (evt) => {
+		evt.preventDefault();
 		if (document.body.style.background === "black") {
 			document.body.style.background = "pink";	
 		} else {
@@ -126,7 +127,7 @@ function tourDeForce() {
 
 	controlPanelDivE.style.marginBottom = "20px";
 	
-	controlPanelDivE.style.display = "block";
+	controlPanelDivE.style.display = "none";
 	
 	//
 	
