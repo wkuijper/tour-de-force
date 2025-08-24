@@ -600,7 +600,7 @@ export class Tour {
 
         this.__batchCutAddressLines = [...batchCuts];
         
-        this.__usedSegments = segments.map((name) => tours.segments.forName(name));
+        this.__servedSegments = segments.map((name) => tours.segments.forName(name));
 
         this.__addressLineToStreetPartNumberMap = new Map();
         
@@ -631,7 +631,7 @@ export class Tour {
                 }
                 streetSet.add(street);
             }
-            this.__townToStreetsMap.set(town, streets);
+            this.__townToStreetsMap.set(town, streetSet);
             for (const street of streetSet) {
                 if (this.__streetToTownMap.has(street)) {
                     this.__streetToTownMap.set(street, null);
@@ -661,6 +661,9 @@ export class Tour {
     }
     
     checkStreetAndTown(street, town) {
+        if (!this.__townToStreetsMap.has(town)) {
+            throw new Error(`undeclared town in: ${this.path()}: street: ${street}: town: ${town}`);
+        }
         const streets = this.__townToStreetsMap.get(town);
         if (streets === undefined || !streets.has(street)) {
             throw new Error(`undeclared street/town in: ${this.path()}: street: ${street}: town: ${town}`);
@@ -681,8 +684,8 @@ export class Tour {
         return this.__legs.values();
     }
 
-    usedSegments() {
-        return this.__usedSegments.values();
+    servedSegments() {
+        return this.__servedSegments.values();
     }
 
     streetPartNumberForAddressLine(addressLine) {
@@ -709,7 +712,7 @@ export class Leg {
     }
     
     path() {
-        return this.tour.path() + `: leg#${this.index}`;
+        return this.tour.path() + `: ${this.desc}`;
     }
     
     constructor(tour, legDef, index) {
@@ -918,6 +921,18 @@ export class StreetPartNumber {
 
 export class TourDeForce {
 
+    get name() {
+        return this.__tour.name;
+    }
+
+    get date() {
+        return this.__date;
+    }
+
+    get days() {
+        return this.__days;
+    }
+    
     get dayBits() {
         return this.__dayBits;
     }
@@ -934,19 +949,42 @@ export class TourDeForce {
         return this.__activeQuantityMap.entries();
     }
     
-    constructor(tour, days) {
+    constructor(tour, date) {
+
         this.__activeQuantityMap = new Map();
         this.__activeQuantity = 0;
         
         this.__tour = tour;
+        this.__date = date;
+        
+        const day = date.getDay();
+
+        let days = "mdwdvzz";
+        if (day === 0) {
+            days = "Mdwdvzz";
+        } else if (day === 1) {
+            days = "mDwdvzz";
+        } else if (day === 2) {
+            days = "mdWdvzz";
+        } else if (day === 3) {
+            days = "mdwDvzz";
+        } else if (day === 4) {
+            days = "mdwdVzz";
+        } else if (day === 5) {
+            days = "mdwdvZz";
+        } else if (day === 6) {
+            days = "mdwdvzZ";
+        }
+        
         this.__days = days;
+        
         const dayBits = parseDayBits(days);
         this.__dayBits = dayBits;
         
         const addressLineToAddressMap = new Map();
         this.__addressLineToAddressMap = addressLineToAddressMap;
 
-        for (const segment of tour.usedSegments()) {
+        for (const segment of tour.servedSegments()) {
             for (const address of segment.allAddresses()) {
                 const addressLine = address.line;
                 if (addressLineToAddressMap.has(addressLine)) {

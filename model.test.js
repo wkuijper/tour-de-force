@@ -380,7 +380,7 @@ export function testSegments(report) {
 
 const testTourDefs = [
 	{
-		tour: "Doordeweekse Pannenkoek",
+		tour: "Dubbele Pannenkoek",
         days: "MDWDVzz",
         segments: [
             "Zenderen LR",
@@ -527,13 +527,37 @@ export function testTourDeForce(report) {
 
 	const tours = new Tours(segments, testTourDefs);
 
-	const tour = tours.forName("Doordeweekse Pannenkoek");
+	const tour = tours.forName("Dubbele Pannenkoek");
 
-	const tourDeForce = new TourDeForce(tour, "mdwdvZz");
+	const tourDeForce = new TourDeForce(tour, new Date("8/24/2025"));
 
+	outputLine(`TOUR DE FORCE`);
+	
+	const formattedDate = new Intl.DateTimeFormat('nl', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(tourDeForce.date);
+	
+	outputLine(`  name: ${tourDeForce.name}`);
+	outputLine(`  date: ${formattedDate}`);
+	outputLine(`  days: ${tourDeForce.days}`);
+	outputLine(`  serves:`);
+	for (const segment of tour.servedSegments()) {
+		const officialName = segment.officialName;
+		if (officialName === null) {
+			continue;
+		}
+		outputLine(`    ${officialName}`);
+	}
+	outputLine(`  injects:`);
+	for (const segment of tour.servedSegments()) {
+		const officialName = segment.officialName;
+		if (officialName !== null) {
+			continue;
+		}
+		outputLine(`    ${segment.name}`);
+	}
+	
 	for (const batchDeForce of tourDeForce.allBatchesDeForce()) {
 		outputLine(` `);
-		outputLine(`PREP FOR BATCH#${batchDeForce.index} (${batchDeForce.title})`);
+		outputLine(`PREP FOR BATCH #${batchDeForce.index} (${batchDeForce.title})`);
 		outputLine(` `);
 		outputLine(`  Product |   Amount`);
 		outputLine(`  --------|---------`);
