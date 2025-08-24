@@ -24,33 +24,24 @@ import {
 	parseQuantity,
 } from "./model.js";
 
-function tourDeForce() {
+function tourDeForce(fontSize, bgColor, fgColor) {
 
-	//window.onbeforeunload = (evt) => {
-	//	return "Are you sure?";
-	//}
-
-	/*document.body.ondblclick = (evt) => {
-		evt.preventDefault();
-		if (document.body.style.background === "black") {
-			document.body.style.background = "pink";	
-		} else {
-			document.body.style.background = "black";
-		}
-	};*/
+	window.onbeforeunload = (evt) => {
+		return "Are you sure?";
+	}
 
 	document.body.onclick = (evt) => {
 		evt.preventDefault();
 		if (document.body.style.background !== "green") {
 			document.body.style.background = "green";	
 		} else {
-			document.body.style.background = "rgb(50,50,50)";
+			document.body.style.background = bgColor;
 		}
 	};
 	
-	document.body.style.font = "16pt monospace";
-	document.body.style.color = "white";
-	document.body.style.background = "rgb(50,50,50)";
+	document.body.style.font = `${fontSize} sans-serif`;
+	document.body.style.color = fgColor;
+	document.body.style.background = bgColor;
 	document.body.style.width = "720px";
 	document.body.style.marginLeft = "auto";
 	document.body.style.marginRight = "auto";
@@ -64,13 +55,13 @@ function tourDeForce() {
 	daysDropDownDivE.style.marginTop = "8px";
 	daysDropDownDivE.style.marginRight = "8px";
 	daysDropDownDivE.style.marginBottom = "8px";
-	daysDropDownDivE.style.font = "16pt sans-serif";
+	daysDropDownDivE.style.font = `${fontSize} sans-serif`;
 	
 	const daysDropDownSelectE = document.createElement("select");
 	daysDropDownDivE.appendChild(daysDropDownSelectE);
-	daysDropDownSelectE.style.font = "16pt sans-serif";
-	daysDropDownSelectE.style.background = "black";
-	daysDropDownSelectE.style.color = "white";
+	daysDropDownSelectE.style.font = `${fontSize} sans-serif`;
+	daysDropDownSelectE.style.background = bgColor;
+	daysDropDownSelectE.style.color = fgColor;
 	
 	const daysOptions = [
 		["Today", undefined],
@@ -90,7 +81,7 @@ function tourDeForce() {
 	for (const [title, value] of daysOptions) {
 		const optionE = document.createElement("option");
 		daysDropDownSelectE.appendChild(optionE);
-		optionE.style.font = "16pt sans-serif";
+		optionE.style.font = `${fontSize} sans-serif`;
 		optionE.innerText = title;
 		optionE.value = value;
 	}
@@ -111,8 +102,8 @@ function tourDeForce() {
 	mutationTextAreaE.style.width = "100%";
 	mutationTextAreaE.rows = "4";
 	
-	mutationTextAreaE.style.background = "black";
-	mutationTextAreaE.style.color = "white";
+	mutationTextAreaE.style.background = bgColor;
+	mutationTextAreaE.style.color = fgColor;
 	
 	//
 
@@ -122,7 +113,7 @@ function tourDeForce() {
 	const applyButtonE = document.createElement("button");
 	buttonDivE.appendChild(applyButtonE);
 
-	applyButtonE.style.font = "16pt sans-serif";
+	applyButtonE.style.font = `${fontSize} sans-serif`;
 	applyButtonE.style.background = "gray";
 	applyButtonE.style.color = "white";
 	applyButtonE.style.width = "100%";
@@ -149,10 +140,10 @@ function tourDeForce() {
 		}
 		const preE = document.createElement("pre");
 		if (lineAbove) {
-			preE.style.borderTop = "1px solid white";
+			preE.style.borderTop = `1px solid ${fgColor}`;
 		}
 		if (lineBelow) {
-			preE.style.borderBottom = "1px solid white";
+			preE.style.borderBottom = `1px solid ${fgColor}`;
 		}
 		preE.style.marginTop = "4px";
 		preE.style.marginBottom = "4px";
@@ -342,4 +333,7 @@ function tourDeForce() {
 
 }
 
-tourDeForce();
+//tourDeForce("8pt", "white", "black");
+
+
+tourDeForce("16pt", "rgb(50,50,50)", "white");
