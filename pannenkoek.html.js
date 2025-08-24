@@ -31,7 +31,9 @@ function tourDeForce() {
 	//}
 	
 	document.body.style.font = "16pt monospace";
-
+	document.body.style.color = "white";
+	document.body.style.background = "black";
+	
 	const controlPanelDivE = document.createElement("div");
 	document.body.appendChild(controlPanelDivE);
 	
@@ -46,6 +48,8 @@ function tourDeForce() {
 	const daysDropDownSelectE = document.createElement("select");
 	daysDropDownDivE.appendChild(daysDropDownSelectE);
 	daysDropDownSelectE.style.font = "16pt sans-serif";
+	daysDropDownSelectE.style.background = "black";
+	daysDropDownSelectE.style.color = "white";
 	
 	const daysOptions = [
 		["Today", undefined],
@@ -86,6 +90,9 @@ function tourDeForce() {
 	mutationTextAreaE.style.width = "100%";
 	mutationTextAreaE.rows = "4";
 	
+	mutationTextAreaE.style.background = "black";
+	mutationTextAreaE.style.color = "white";
+	
 	//
 
 	const buttonDivE = document.createElement("div");
@@ -94,23 +101,42 @@ function tourDeForce() {
 	const applyButtonE = document.createElement("button");
 	buttonDivE.appendChild(applyButtonE);
 
-	applyButtonE.font = "16pt sans-serif";
+	applyButtonE.style.font = "16pt sans-serif";
+	applyButtonE.style.background = "gray";
+	applyButtonE.style.color = "white";
 	applyButtonE.style.width = "100%";
 	applyButtonE.style.height = "100px";
 	applyButtonE.innerText = "GO";
 
 	//
 	
-	const hrE = document.createElement("hr");
-	controlPanelDivE.appendChild(hrE);
+	/*const hrE = document.createElement("hr");
+	controlPanelDivE.appendChild(hrE);*/
 
+	controlPanelDivE.style.marginBottom = "20px";
+	
 	controlPanelDivE.style.display = "block";
 	
 	//
 	
-	const outputLine = (line) => {
+	const output = (text, lineAbove, lineBelow) => {
+		if (lineAbove === undefined) {
+			lineAbove = false;
+		}
+		if (lineBelow === undefined) {
+			lineBelow = false;
+		}
 		const preE = document.createElement("pre");
-		preE.innerText = line;
+		if (lineAbove) {
+			preE.style.borderTop = "1px solid white";
+		}
+		if (lineBelow) {
+			preE.style.borderBottom = "1px solid white";
+		}
+		preE.style.marginTop = "4px";
+		preE.style.marginBottom = "4px";
+		
+		preE.innerText = text;
 		document.body.appendChild(preE);
 	};
 	
@@ -122,26 +148,26 @@ function tourDeForce() {
 
 	const tour = tours.forName("Dubbele Pannenkoek");
 
-	const tourDeForce = new TourDeForce(tour, new Date("8/24/2025"), "MDWDVZZ");
+	const tourDeForce = new TourDeForce(tour, new Date());
 
-	outputLine(`TOUR DE FORCE`);
+	output(`TOUR DE FORCE`, true, true);
 	
-	outputLine(` `);
+	output(` `);
 	
 	const formattedDate = new Intl.DateTimeFormat('nl', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(tourDeForce.date);
 	
-	outputLine(`  name:`);
-	outputLine(`    ${tourDeForce.name}`);
+	output(`  name:`);
+	output(`    ${tourDeForce.name}`);
 	
-	outputLine(` `);
+	output(` `);
 	
-	outputLine(`  date:`);
-	outputLine(`     ${formattedDate}`);
+	output(`  date:`);
+	output(`     ${formattedDate}`);
 	
-	outputLine(` `);
+	output(` `);
 	
-	outputLine(`  days:`);
-	outputLine(`    ${tourDeForce.days} ${tourDeForce.dateDays !== tourDeForce.days ? `!== ${tourDeForce.dateDays}` : ``}`);
+	output(`  days:`);
+	output(`    ${tourDeForce.days} ${tourDeForce.dateDays !== tourDeForce.days ? `!== ${tourDeForce.dateDays}` : ``}`);
 	
 	let servedSegments = [];
 	let injectedSegments = [];
@@ -155,37 +181,39 @@ function tourDeForce() {
 	}
 
 	if (servedSegments.length > 0) {
-		outputLine(` `);
-		outputLine(`  serves:`);
+		output(` `);
+		output(`  serves:`);
 		for (const servedSegment of servedSegments) {
-			outputLine(`    ${servedSegment.officialName}`);
+			output(`    ${servedSegment.officialName}`);
 		}
 	}
 	
 	if (injectedSegments.length > 0) {
-		outputLine(` `);
-		outputLine(`  injects:`);
+		output(` `);
+		output(`  injects:`);
 		for (const servedSegment of injectedSegments) {
-			outputLine(`    ${servedSegment.name}`);
+			output(`    ${servedSegment.name}`);
 		}
 	}
 
-	outputLine(` `);	
-	
-	outputLine(`UNASSIGNED ADDRESSES`);
-	
-	outputLine(` `);
-	
-	for (const unassignedAddress of tourDeForce.unassignedAddresses()) {
-		outputLine(`  ${unassignedAddress.line}`);
+	output(` `);	
+
+	if (tourDeForce.numberOfUnassignedAddresses > 0) {
+		output(`UNASSIGNED ADDRESSES`, true, true);
+		
+		output(` `);
+		
+		for (const unassignedAddress of tourDeForce.unassignedAddresses()) {
+			output(`  ${unassignedAddress.line}`);
+		}
 	}
 	
 	for (const batchDeForce of tourDeForce.allBatchesDeForce()) {
-		outputLine(` `);
-		outputLine(`PREP FOR BATCH #${batchDeForce.index} (${batchDeForce.title})`);
-		outputLine(` `);
-		outputLine(`  Product |   Amount`);
-		outputLine(`  --------|---------`);
+		output(` `);
+		output(`PREP FOR BATCH #${batchDeForce.index} (${batchDeForce.title})`, true, true);
+		output(` `);
+		output(`  Product |   Amount`);
+		output(`  --------|---------`);
 		for (const [code, count] of batchDeForce.activeQuantities()) {
 			const codeWidth = 8;
 			const codeLength = code.length;
@@ -206,11 +234,11 @@ function tourDeForce() {
 			}
 			lineParts.push(countStr);
 			const line = lineParts.join("");
-			outputLine(line);		
+			output(line);		
 		}
-		outputLine(` `);
+		output(` `);
 		for (const preparationNumberDeForce of batchDeForce.preparationNumbersDeForce()) {
-			outputLine(`  ${preparationNumberDeForce.addressLine}:`);
+			output(`  ${preparationNumberDeForce.addressLine}:`);
 			let prepStr = "    ";
 			for (const itemDeForce of preparationNumberDeForce.allItemsDeForce()) {
 				prepStr += "[" + itemDeForce.code;
@@ -220,26 +248,27 @@ function tourDeForce() {
 				}
 				prepStr += "] ";
 			}
-			outputLine(prepStr);
+			output(prepStr);
+			output(` `);
 		}
 	}
 	
-	outputLine(` `);	
+	output(` `);	
 	
-	outputLine(`DELIVER`);
-	outputLine(` `);
+	output(`DELIVER`, true, true);
+	output(` `);
 	for (const legDeForce of tourDeForce.allLegsDeForce()) {
-		outputLine(`  ========================================`)
-		outputLine(`  ${legDeForce.desc} (${legDeForce.activeQuantity}x)`);
+		output(` `)
+		output(`${legDeForce.desc} (${legDeForce.activeQuantity}x)`, true);
 		for (const partDeForce of legDeForce.allPartsDeForce()) {
 			if (partDeForce.numberOfAddresses <= 0) {
 				continue;
 			}
-			outputLine(`    ----------------------------------------`)
+			output(` `)
 			if (partDeForce.townIsNecessary) {
-				outputLine(`    ${partDeForce.street}, ${partDeForce.town} (${partDeForce.activeQuantity}x)`)
+				output(`    ${partDeForce.street}, ${partDeForce.town} (${partDeForce.activeQuantity}x)`)
 			} else {
-				outputLine(`    ${partDeForce.street} (${partDeForce.activeQuantity}x)`)
+				output(`    ${partDeForce.street} (${partDeForce.activeQuantity}x)`)
 			}
 			for (const numberDeForce of partDeForce.allNumbersDeForce()) {
 				const firstInBatch = numberDeForce.firstInBatch;
@@ -264,7 +293,7 @@ function tourDeForce() {
 					if (itemDeForce.days !== null) {
 						line += " | " + itemDeForce.days;
 					}
-					outputLine(line);
+					output(line);
 					line = indent;
 					line += "        ";
 				}
@@ -282,7 +311,7 @@ function tourDeForce() {
 					if (itemDeForce.days !== null) {
 						line += " | " + itemDeForce.days;
 					}
-					outputLine(line);
+					output(line);
 					line = indent;
 					line += "        ";
 				}
