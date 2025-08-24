@@ -831,7 +831,7 @@ export class StreetPart {
                         this.__handleStreetNumber(`${i}`);  
                     }
                 } else if (from < to) {
-                    for (let i = from; i >= to; i += 2) {
+                    for (let i = from; i <= to; i += 2) {
                         this.__handleStreetNumber(`${i}`);
                     }
                 } else if (from === to) {
@@ -1076,6 +1076,10 @@ export class TourDeForce {
 
     unassignedAddresses() {
         return this.__unassignedAddresses.values();
+    }
+
+    get numberOfUnassignedAddresses() {
+        return this.__unassignedAddresses.length;
     }
 
     addressForStreetPartNumber(streetPartNumber) {

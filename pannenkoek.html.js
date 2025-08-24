@@ -253,8 +253,11 @@ function tourDeForce(fontSize, bgColor, fgColor) {
 			output(`  ${preparationNumberDeForce.addressLine}:`);
 			let prepStr = "    ";
 			for (const itemDeForce of preparationNumberDeForce.allItemsDeForce()) {
+				if (itemDeForce.activeQuantity === 0) {
+					continue;
+				}
 				prepStr += "[" + itemDeForce.code;
-				const quantity = itemDeForce.quantity;
+				const quantity = itemDeForce.activeQuantity;
 				if (quantity < 1 || quantity > 1) {
 					prepStr += ` (${quantity}x)`;
 				}
@@ -292,7 +295,12 @@ function tourDeForce(fontSize, bgColor, fgColor) {
 				const unstemmedAndAlignedStreetNumber = unstemAndAlignStreetNumber(numberDeForce.number, 3, 1, 4);
 				line += unstemmedAndAlignedStreetNumber;
 				for (const itemDeForce of numberDeForce.activeItemsDeForce()) {
-					line += ` ${itemDeForce.code}`;
+					if (itemDeForce.needsPreparation) {
+						line += "!";
+					} else {
+						line += " ";
+					}
+					line += `${itemDeForce.code}`;
 					if (itemDeForce.activeQuantity < 1 || itemDeForce.activeQuantity > 1) {
 						line += ` (${itemDeForce.activeQuantity}x)`;
 					}
