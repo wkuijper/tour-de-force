@@ -1,4 +1,4 @@
-const streetNumberRegExp = new RegExp("^([1-9][0-9]*)( [A-Za-z])?$");
+const streetNumberRegExp = new RegExp("^(0|[1-9][0-9]*)( [0-9A-Za-z]+)?$");
 
 export function stemStreetNumber(streetNumber) {
     const match = streetNumberRegExp.exec(streetNumber);
@@ -6,13 +6,16 @@ export function stemStreetNumber(streetNumber) {
         throw new Error(`can't stem this street number: ${streetNumber}`)
     }
     const numericPart = match[1];
-    const optionalLetterSuffix = match[2] ?? "";
-    const trimmedUpperCasedSuffix = optionalLetterSuffix.trim().toUpperCase();
-    const stemmed = numericPart + trimmedUpperCasedSuffix;
+    const optionalSuffix = match[2] ?? "";
+    if (optionalSuffix === "") {
+        return numericPart;
+    }
+    const trimmedUpperCasedSuffix = optionalSuffix.trim().toUpperCase();
+    const stemmed = numericPart + "-" + trimmedUpperCasedSuffix;
     return stemmed;
 }
 
-const stemmedStreetNumberRegExp = new RegExp("^([1-9][0-9]*)([A-Z])?$");
+const stemmedStreetNumberRegExp = new RegExp("^(0|[1-9][0-9]*)(-[0-9A-Z]+)?$");
 
 export function unstemAndAlignStreetNumber(stemmedStreetNumber, numericPartWidth, interSpacing, alphanumericPartWidth) {
     const match = stemmedStreetNumberRegExp.exec(stemmedStreetNumber);
@@ -20,7 +23,7 @@ export function unstemAndAlignStreetNumber(stemmedStreetNumber, numericPartWidth
         throw new Error(`can't unstem this street number: ${stemmedStreetNumber}`)
     }
     const numericPart = match[1];
-    const optionalAlphanumericPart = match[2] ?? "";
+    const optionalAlphanumericPart = match[2] ? match[2].slice(1) : "";
     const numericPartLength = numericPart.length;
     const indent = Math.max(0, numericPartWidth - numericPartLength);
     const unstemmedParts = [];
@@ -158,22 +161,22 @@ export function unparseDayBits(bits) {
 
 const qtyRegExp = new RegExp("^([0-9][0-9]*)$");
 
-export function parseNumQty(qty) {
-    const match = qtyRegExp.exec(qty);
+export function parseQuantity(qtyStr) {
+    const match = qtyRegExp.exec(qtyStr);
     if (match === null) {
-        throw new Error(`can't parse quantity: ${qty}`)
+        throw new Error(`can't parse quantity: ${qtyStr}`)
     }
-    const numQty = parseInt(qty, 10);
-    if (numQty === 0) {
+    const quantity = parseInt(qtyStr, 10);
+    if (quantity === 0) {
         throw new Error(`quantity is zero`);
     }
-    if (numQty > (1 << 30)) {
-        throw new Error(`quantity is too large: ${qty}`);
+    if (quantity > (1 << 30)) {
+        throw new Error(`quantity is too large: ${qtyStr}`);
     }
-    return numQty;
+    return quantity;
 }
 
-const purelyDecimalStreetNumberRegExp = new RegExp("^([0-9][0-9]*)$");
+const purelyDecimalStreetNumberRegExp = new RegExp("^(0|[1-9][0-9]*)$");
 
 export function parsePurelyDecimalStreetNumber(streetNumberStr) {
     const match = purelyDecimalStreetNumberRegExp.exec(streetNumberStr);
@@ -181,9 +184,9 @@ export function parsePurelyDecimalStreetNumber(streetNumberStr) {
         throw new Error(`can't parse purely decimal street number: ${streetNumberStr}`)
     }
     const streetNumber = parseInt(streetNumberStr, 10);
-    if (streetNumber === 0) {
-        throw new Error(`street number is zero`);
-    }
+    //if (streetNumber === 0) {
+    //    throw new Error(`street number is zero`);
+    //}
     if (streetNumber > (1 << 30)) {
         throw new Error(`street number is too large: ${streetNumberStr}`);
     }
@@ -193,18 +196,18 @@ export function parsePurelyDecimalStreetNumber(streetNumberStr) {
 export function validateStemmedStreetNumber(streetNumberStr) {
     const match = stemmedStreetNumberRegExp.exec(streetNumberStr);
     if (match === null) {
-        throw new Error(`street number must be non-zero and stemmed: ${streetNumberStr}`)
+        throw new Error(`street number must be stemmed: ${streetNumberStr}`)
     }
     return streetNumberStr;
 }
 
 export class ItemInfos {
 
-    _declareItemInfo(officialCode, name, itemInfo) {
-        if (this.__officialCodeMap.has(officialCode)) {
-            throw new Error(`duplicate offical item code: ${officialCode}`);
+    _declareItemInfo(code, name, itemInfo) {
+        if (this.__codeMap.has(code)) {
+            throw new Error(`duplicate item code: ${code}`);
         }
-        this.__officialCodeMap.set(officialCode, itemInfo);
+        this.__codeMap.set(code, itemInfo);
         if (this.__nameMap.has(name)) {
             throw new Error(`duplicate item name: ${name}`);
         }
@@ -212,22 +215,25 @@ export class ItemInfos {
     }
     
     constructor(itemDefs) {
-        this.__officialCodeMap = new Map();
+        this.__codeMap = new Map();
         this.__nameMap = new Map();
         for (const itemDef of itemDefs) {
             const itemInfo = new ItemInfo(this, itemDef);
-        }  
+        }
+        const sortedItemInfos = [...this.__nameMap.values()];
+        sortedItemInfos.sort((a, b) => a.order - b.order);
+        this.__sortedItemInfos = sortedItemInfos;
     }
 
     all() {
-        return this.__officialCodeMap.values();
+        return this.__sortedItemInfos.values();
     }
 
-    forOfficialCode(officialCode) {
-        if (!this.__officialCodeMap.has(officialCode)) {
-            throw new Error(`unknown official item code: ${officialCode}`);
+    forCode(code) {
+        if (!this.__codeMap.has(code)) {
+            throw new Error(`unknown item code: ${code}`);
         }
-        return this.__officialCodeMap.get(officialCode);
+        return this.__codeMap.get(code);
     }
     
     forName(name) {
@@ -240,6 +246,14 @@ export class ItemInfos {
 
 export class ItemInfo {
 
+    get code() {
+        return this.__code;
+    }
+    
+    get code() {
+        return this.__code;
+    }
+    
     get officialCode() {
         return this.__officialCode;
     }
@@ -251,18 +265,38 @@ export class ItemInfo {
     get order() {
         return this.__order;
     }
+
+    get needsPreparation() {
+        return this.__needsPreparation;
+    }
+    
+    get needsDelivery() {
+        return this.__needsDelivery;
+    }
+    
+    get needsPickup() {
+        return this.__needsPickup;
+    }
     
     constructor(parent, itemDef) {
         this.__parent = parent;
         const {
+            code,
             officialCode,
             name,
             order,
+            needsPreparation,
+            needsDelivery,
+            needsPickup,
         } = itemDef;
         this.__officialCode = officialCode;
+        this.__code = code;
         this.__name = name;
         this.__order = order;
-        parent._declareItemInfo(officialCode, name, this);
+        this.__needsPreparation = needsPreparation;
+        this.__needsDelivery = needsDelivery;
+        this.__needsPickup = needsPickup;
+        parent._declareItemInfo(code, name, this);
   }
 }
 
@@ -344,12 +378,12 @@ export class Segment {
         for (const numberDef of numbers) {
             const numberParts = numberDef.split("|").map((part) => part.trim());
             const numberPart = numberParts.length > 0 ? numberParts[0] : null;
-            const officialCodePart = numberParts.length > 1 ? numberParts[1] : null;
+            const codePart = numberParts.length > 1 ? numberParts[1] : null;
             const remarkPart = numberParts.length > 2 ? numberParts[2] : null;
             const daysPart = numberParts.length > 3 ? numberParts[3] : null;
             const qtyPart = numberParts.length > 4 ? numberParts[4] : null;
             const address = this.__getOrDeclareAddress(street, numberPart, town);
-            address.addItem(officialCodePart, remarkPart, daysPart, qtyPart);
+            address.addItem(codePart, remarkPart, daysPart, qtyPart);
         }
     }
 
@@ -395,6 +429,18 @@ export class Address {
     get dayBits() {
         return this.__dayBits;
     }
+
+    get needsPreparation() {
+        return this.__needsPreparation;
+    }
+    
+    get needsDelivery() {
+        return this.__needsDelivery;
+    }
+    
+    get needsPickup() {
+        return this.__needsPickup;
+    }
     
     constructor(segment, line, street, number, town) {
         this.__segment = segment;
@@ -404,15 +450,19 @@ export class Address {
         this.__town = town;
         this.__itemList = [];
         this.__dayBits = 0;
+        this.__needsPreparation = false;
     }
 
-    addItem(officialCode, remark, days, qty) {
-        const item = new Item(this, officialCode, remark, days, qty, this.__itemList.length);
+    addItem(code, remark, days, qtyStr) {
+        const item = new Item(this, code, remark, days, qtyStr, this.__itemList.length);
         this.__dayBits |= item.dayBits;
     }
 
     _declareItem(item) {
         this.__itemList.push(item);
+        this.__needsPreparation = this.__needsPreparation || item.needsPreparation;
+        this.__needsPickup = this.__needsPickup || item.needsPickup;
+        this.__needsDelivery = this.__needsDelivery || item.needsDelivery;
     }
 
     allItems() {
@@ -422,8 +472,12 @@ export class Address {
 
 export class Item {
 
-    get officialCode() {
-        return this.__officialCode;
+    get code() {
+        return this.__code;
+    }
+    
+    get code() {
+        return this.__code;
     }
 
     get info() {
@@ -442,30 +496,42 @@ export class Item {
         return this.__dayBits;
     }
     
-    get qty() {
-        return this.__qty;
+    get qtyStr() {
+        return this.__qtyStr;
     }
 
     get order() {
         return this.__order;
     }
     
-    get numQty() {
-        return this.__numQty;
+    get quantity() {
+        return this.__quantity;
+    }
+
+    get needsPreparation() {
+        return this.__info.needsPreparation;
+    }
+
+    get needsDelivery() {
+        return this.__info.needsDelivery;
     }
     
-    constructor(address, officialCode, remark, days, qty, order) {
+    get needsPickup() {
+        return this.__info.needsPickup;
+    }
+    
+    constructor(address, code, remark, days, qtyStr, order) {
         const itemInfos = address.segment.segments.itemInfos;
-        const itemInfo = itemInfos.forOfficialCode(officialCode);
+        const itemInfo = itemInfos.forCode(code);
         this.__address = address;
-        this.__officialCode = officialCode;
+        this.__code = code;
         this.__info = itemInfo;
         this.__remark = remark;
         this.__days = days;
         this.__dayBits = parseDayBits(days ?? "MDWDVZZ");
-        this.__qty = qty;
+        this.__qtyStr = qtyStr;
         this.__order = order;
-        this.__numQty = parseNumQty(qty ?? "1");
+        this.__quantity = parseQuantity(qtyStr ?? "1");
         address._declareItem(this);
     }
 }
@@ -524,12 +590,15 @@ export class Tour {
             tour,
             days,
             segments,
+            batchCuts,
             towns,
             legs,
         } = tourDef;
         this.__name = tour;
         this.__days = days;
         this.__dayBits = parseDayBits(days);
+
+        this.__batchCutAddressLines = [...batchCuts];
         
         this.__usedSegments = segments.map((name) => tours.segments.forName(name));
 
@@ -618,6 +687,10 @@ export class Tour {
 
     streetPartNumberForAddressLine(addressLine) {
         return this.__addressLineToStreetPartNumberMap.get(addressLine);
+    }
+
+    allBatchCutAddressLines() {
+        return this.__batchCutAddressLines.values();
     }
 }
 
@@ -853,12 +926,18 @@ export class TourDeForce {
         return this.__tour;
     }
 
-    filteredItemCounts() {
-        return this.__filteredItemCountMap.entries();
+    get activeQuantity() {
+        return this.__activeQuantity;
+    }
+    
+    activeQuantities() {
+        return this.__activeQuantityMap.entries();
     }
     
     constructor(tour, days) {
-        this.__filteredItemCountMap = new Map();
+        this.__activeQuantityMap = new Map();
+        this.__activeQuantity = 0;
+        
         this.__tour = tour;
         this.__days = days;
         const dayBits = parseDayBits(days);
@@ -871,7 +950,7 @@ export class TourDeForce {
             for (const address of segment.allAddresses()) {
                 const addressLine = address.line;
                 if (addressLineToAddressMap.has(addressLine)) {
-                    const existsingAddress = addressLineToAddressMap.get(addressLine);
+                    const existingAddress = addressLineToAddressMap.get(addressLine);
                     const existingSegment = existingAddress.segment;
                     throw new Error(`ambiguous address occuring in more than one segment: ${addressLine}: first segment: ${segment.name}: second segment: ${existingSegment.name}`);
                 }
@@ -904,6 +983,48 @@ export class TourDeForce {
         }
 
         this.__legsDeForce = legsDeForce;
+
+        const batches = [];
+
+        const numberDeForceList = [...this.allNumbersDeForce()];
+        
+        const combinedBatch = new BatchDeForce(this, 0, "<= combined =>", numberDeForceList);
+        
+        batches.push(combinedBatch);
+
+        const batchCutAddressLines = [...tour.allBatchCutAddressLines()];
+
+        if (batchCutAddressLines.length > 0) {
+            if (numberDeForceList.length === 0) {
+                throw new Error(`batch cut address does not occur in tour de force: ${batchCutAddressLines[0]}`);
+            }
+            const lastAddressLine = numberDeForceList[numberDeForceList.length-1].addressLine;
+            if (batchCutAddressLines.length === 0
+                || batchCutAddressLines[batchCutAddressLines.length-1] !== lastAddressLine) {
+                batchCutAddressLines.push(lastAddressLine);
+            }
+            let startIndex = 0;
+            let endIndex = 0;
+            for (const batchCutAddressLine of batchCutAddressLines) {
+                while (numberDeForceList[endIndex].addressLine !== batchCutAddressLine) {
+                    endIndex++;
+                    if (endIndex >= numberDeForceList.length) {
+                        throw new Error(`batch cut address does not occur in tour de force or it occurs before one of the preceding batch cut addresses: ${batchCutAddressLine}`)
+                    }
+                }
+                endIndex++;
+                const batchNumberDeForceList = numberDeForceList.slice(startIndex, endIndex);
+                const batchDeForce = new BatchDeForce(this, batches.length, `<= ${batchCutAddressLine}`, batchNumberDeForceList);
+                const firstNumberDeForce = numberDeForceList[startIndex];
+                firstNumberDeForce._firstInBatch = batchDeForce;
+                batches.push(batchDeForce);
+                startIndex = endIndex;
+            }
+        } else if (numberDeForceList.length > 0) {
+            const firstNumberDeForce = numberDeForceList[0];
+            firstNumberDeForce._firstInBatch = combinedBatch;
+        }
+        this.__batchesDeForce = batches;
     }
 
     allUnassignedAddresses() {
@@ -918,13 +1039,24 @@ export class TourDeForce {
         return this.__legsDeForce.values();
     }
 
-    _increaseFilteredItemCount(officialCode, additionalCount) {
-        if (!this.__filteredItemCountMap.has(officialCode)) {
-            this.__filteredItemCountMap.set(officialCode, 0);
+    _increaseActiveQuantity(code, additionalCount) {
+        if (!this.__activeQuantityMap.has(code)) {
+            this.__activeQuantityMap.set(code, 0);
         }
-        const prevCount = this.__filteredItemCountMap.get(officialCode);
+        const prevCount = this.__activeQuantityMap.get(code);
         const nextCount = prevCount + additionalCount;
-        this.__filteredItemCountMap.set(officialCode, nextCount);
+        this.__activeQuantityMap.set(code, nextCount);
+        this.__activeQuantity += additionalCount;
+    }
+    
+    *allNumbersDeForce() {
+        for (const legDeForce of this.allLegsDeForce()) {
+            yield* legDeForce.allNumbersDeForce();
+        }
+    }
+
+    allBatchesDeForce() {
+        return this.__batchesDeForce.values();
     }
 }
 
@@ -942,8 +1074,18 @@ export class LegDeForce {
         return this.__leg.desc;
     }
     
+    get activeQuantity() {
+        return this.__activeQuantity;
+    }
+    
+    activeQuantities() {
+        return this.__activeQuantityMap.entries();
+    }
+    
     constructor(tourDeForce, leg) {
-        this.__filteredItemCountMap = new Map();
+        this.__activeQuantityMap = new Map();
+        this.__activeQuantity = 0;
+        
         this.__tourDeForce = tourDeForce;
         this.__leg = leg;
 
@@ -958,15 +1100,22 @@ export class LegDeForce {
     allPartsDeForce() {
         return this.__partsDeForce.values();
     }
-    
-    _increaseFilteredItemCount(officialCode, additionalCount) {
-        if (!this.__filteredItemCountMap.has(officialCode)) {
-            this.__filteredItemCountMap.set(officialCode, 0);
+
+    *allNumbersDeForce() {
+        for (const partDeForce of this.allPartsDeForce()) {
+            yield* partDeForce.allNumbersDeForce();
         }
-        const prevCount = this.__filteredItemCountMap.get(officialCode);
+    }
+    
+    _increaseActiveQuantity(code, additionalCount) {
+        if (!this.__activeQuantityMap.has(code)) {
+            this.__activeQuantityMap.set(code, 0);
+        }
+        const prevCount = this.__activeQuantityMap.get(code);
         const nextCount = prevCount + additionalCount;
-        this.__filteredItemCountMap.set(officialCode, nextCount);
-        this.__tourDeForce._increaseFilteredItemCount(officialCode, additionalCount);
+        this.__activeQuantityMap.set(code, nextCount);
+        this.__activeQuantity += additionalCount;
+        this.__tourDeForce._increaseActiveQuantity(code, additionalCount);
     }
 }
 
@@ -995,9 +1144,19 @@ export class PartDeForce {
     get numberOfAddresses() {
         return this.__numbersDeForce.length;
     }
+
+    get activeQuantity() {
+        return this.__activeQuantity;
+    }
+    
+    activeQuantities() {
+        return this.__activeQuantityMap.entries();
+    }
     
     constructor(legDeForce, streetPart) {
-        this.__filteredItemCountMap = new Map();
+        this.__activeQuantityMap = new Map();
+        this.__activeQuantity = 0;
+        
         this.__legDeForce = legDeForce;
         this.__streetPart = streetPart;
 
@@ -1018,14 +1177,15 @@ export class PartDeForce {
         return this.__numbersDeForce.values();
     }
     
-    _increaseFilteredItemCount(officialCode, additionalCount) {
-        if (!this.__filteredItemCountMap.has(officialCode)) {
-            this.__filteredItemCountMap.set(officialCode, 0);
+    _increaseActiveQuantity(code, additionalCount) {
+        if (!this.__activeQuantityMap.has(code)) {
+            this.__activeQuantityMap.set(code, 0);
         }
-        const prevCount = this.__filteredItemCountMap.get(officialCode);
+        const prevCount = this.__activeQuantityMap.get(code);
         const nextCount = prevCount + additionalCount;
-        this.__filteredItemCountMap.set(officialCode, nextCount);
-        this.__legDeForce._increaseFilteredItemCount(officialCode, additionalCount);
+        this.__activeQuantityMap.set(code, nextCount);
+        this.__activeQuantity += additionalCount;
+        this.__legDeForce._increaseActiveQuantity(code, additionalCount);
     }
 }
 
@@ -1063,25 +1223,51 @@ export class NumberDeForce {
         return this.__streetPartNumber.addressLine;
     }
     
+    get needsPreparation() {
+        return this.__address.needsPreparation;
+    }
+    
+    get needsDelivery() {
+        return this.__address.needsDelivery;
+    }
+    
+    get needsPickup() {
+        return this.__address.needsPickup;
+    }
+
+    get activeQuantity() {
+        return this.__activeQuantity;
+    }
+    
+    activeQuantities() {
+        return this.__activeQuantityMap.entries();
+    }
+
+    get firstInBatch() {
+        return this._firstInBatch;
+    }
+    
     constructor(partDeForce, streetPartNumber, address) {
-        this.__filteredItemCountMap = new Map();
+        this.__activeQuantityMap = new Map();
+        this.__activeQuantities = 0;
+        
         this.__partDeForce = partDeForce;
         this.__streetPartNumber = streetPartNumber;
         this.__address = address;
 
         const itemMap = new Map();
         for (const item of address.allItems()) {
-            const officialCode = item.officialCode;
-            if (!itemMap.has(officialCode)) {
-                itemMap.set(officialCode, []);
+            const code = item.code;
+            if (!itemMap.has(code)) {
+                itemMap.set(code, []);
             }
-            itemMap.get(officialCode).push(item);
+            itemMap.get(code).push(item);
         }
 
         const itemDeForceMap = new Map();
-        for (const [officialCode, itemList] of itemMap.entries()) {
+        for (const [code, itemList] of itemMap.entries()) {
             const itemDeForce = new ItemDeForce(this, itemList);
-            itemDeForceMap.set(officialCode, itemDeForce);
+            itemDeForceMap.set(code, itemDeForce);
         }
 
         this.__itemDeForceMap = itemDeForceMap;
@@ -1096,7 +1282,7 @@ export class NumberDeForce {
         const activeItemDeForceList = [];
         const passiveItemDeForceList = [];
         for (const itemDeForce of itemDeForceList) {
-            if (itemDeForce.filteredNumQty <= 0) {
+            if (itemDeForce.activeQuantity <= 0) {
                 passiveItemDeForceList.push(itemDeForce);
             } else {
                 activeItemDeForceList.push(itemDeForce);
@@ -1105,8 +1291,10 @@ export class NumberDeForce {
 
         this.__passiveItemDeForceList = passiveItemDeForceList;
         this.__activeItemDeForceList = activeItemDeForceList;
-    }
 
+        this._firstInBatch = null;
+    }
+    
     allItemsDeForce() {
         return this.__itemDeForceList.values();
     }
@@ -1119,14 +1307,15 @@ export class NumberDeForce {
         return this.__activeItemDeForceList.values();
     }
 
-    _increaseFilteredItemCount(officialCode, additionalCount) {
-        if (!this.__filteredItemCountMap.has(officialCode)) {
-            this.__filteredItemCountMap.set(officialCode, 0);
+    _increaseActiveQuantity(code, additionalCount) {
+        if (!this.__activeQuantityMap.has(code)) {
+            this.__activeQuantityMap.set(code, 0);
         }
-        const prevCount = this.__filteredItemCountMap.get(officialCode);
+        const prevCount = this.__activeQuantityMap.get(code);
         const nextCount = prevCount + additionalCount;
-        this.__filteredItemCountMap.set(officialCode, nextCount);
-        this.__partDeForce._increaseFilteredItemCount(officialCode, additionalCount);
+        this.__activeQuantityMap.set(code, nextCount);
+        this.__activeQuantity += additionalCount;
+        this.__partDeForce._increaseActiveQuantity(code, additionalCount);
     }
 }
 
@@ -1140,14 +1329,18 @@ export class ItemDeForce {
         return this.__itemList.values();
     }
 
-    filteredItems() {
-        return this.__filteredItemList.values();
+    activeItems() {
+        return this.__activeItemList.values();
     }
 
     passiveItems() {
         return this.__passiveItemList.values();
     }
 
+    get code() {
+        return this.__code;
+    }
+    
     get officialCode() {
         return this.__officialCode;
     }
@@ -1156,24 +1349,28 @@ export class ItemDeForce {
         return this.__info;
     }
     
-    get filteredRemarks() {
-        return this.__filteredRemarks.values();
+    get activeRemarks() {
+        return this.__activeRemarks.values();
     }
     
     get passiveRemarks() {
         return this.__passiveRemarks.values();
     }
 
-    get filteredNumQty() {
-        return this.__filteredNumQty;
+    get activeQuantity() {
+        return this.__activeQuantity;
+    }
+    
+    get passiveQuantity() {
+        return this.__passiveQuantity;
     }
 
     get unfilteredRemarks() {
         return this.__unfilteredRemarks.values();
     }
 
-    get unfilteredNumQty() {
-        return this.__unfilteredNumQty;
+    get unfilteredQuantity() {
+        return this.__unfilteredQuantity;
     }
 
     get days() {
@@ -1182,6 +1379,18 @@ export class ItemDeForce {
 
     get dayBits() {
         return this.__dayBits;
+    }
+
+    get needsPreparation() {
+        return this.__needsPreparation;
+    }
+    
+    get needsDelivery() {
+        return this.__needsDelivery;
+    }
+    
+    get needsPickup() {
+        return this.__needsPickup;
     }
     
     constructor(numberDeForce, itemList) {
@@ -1195,75 +1404,162 @@ export class ItemDeForce {
         
         const firstItem = itemList[0];
 
-        this.__officialCode = firstItem.officialCode;
+        this.__code = firstItem.code;
         this.__info = firstItem.info;
         
         const tourDeForce = numberDeForce.partDeForce.legDeForce.tourDeForce;
         const tourDayBits = tourDeForce.dayBits;
 
         const unfilteredRemarks = [];
-        let unfilteredNumQty = 0;
+        let unfilteredQuantity = 0;
         let dayBits = 0;
+        let needsPreparation = false;
+        let needsDelivery = false;
+        let needsPickup = false;
 
         for (const item of itemList) {
             const remark = item.remark;
             if (remark !== null) {
                 unfilteredRemarks.push(remark);
             } 
-            unfilteredNumQty += item.numQty;
+            unfilteredQuantity += item.quantity;
             dayBits |= item.dayBits;
+            needsPreparation = needsPreparation || item.needsPreparation;
+            needsDelivery = needsDelivery || item.needsDelivery;
+            needsPickup = needsPickup || item.needsPickup;
         }
 
         this.__dayBits = dayBits;
         this.__days = (dayBits === allweekBits ? null : unparseDayBits(dayBits));
+        this.__needsPreparation = needsPreparation;
+        this.__needsDelivery = needsDelivery;
+        this.__needsPickup = needsPickup;
         
         this.__unfilteredRemarks = unfilteredRemarks;
-        this.__unfilteredNumQty = unfilteredNumQty;
+        this.__unfilteredQuantity = unfilteredQuantity;
         
-        const filteredItemList = [];
+        const activeItemList = [];
         const passiveItemList = [];
         
         for (const item of itemList) {
             if ((item.dayBits & tourDayBits) === 0) {
                 passiveItemList.push(item);
             } else {
-                filteredItemList.push(item);
+                activeItemList.push(item);
             }
         }
 
         this.__passiveItemList = passiveItemList;
-        this.__filteredItemList = filteredItemList;
+        this.__activeItemList = activeItemList;
         
-        const filteredRemarks = [];
-        let filteredNumQty = 0;
+        const activeRemarks = [];
+        let activeQuantity = 0;
 
-        for (const filteredItem of filteredItemList) {
-            const filteredRemark = filteredItem.remark;
-            if (filteredRemark !== null) {
-                filteredRemarks.push(filteredRemark);
+        for (const activeItem of activeItemList) {
+            const activeRemark = activeItem.remark;
+            if (activeRemark !== null) {
+                activeRemarks.push(activeRemark);
             } 
-            filteredNumQty += filteredItem.numQty;
+            activeQuantity += activeItem.quantity;
         }
 
-        this.__filteredRemarks = filteredRemarks;
-        this.__filteredNumQty = filteredNumQty;
-
-
+        this.__activeRemarks = activeRemarks;
+        this.__activeQuantity = activeQuantity;
 
         const passiveRemarks = [];
-        let passiveNumQty = 0;
+        let passiveQuantity = 0;
 
         for (const passiveItem of passiveItemList) {
             const passiveRemark = passiveItem.remark;
             if (passiveRemark !== null) {
                 passiveRemarks.push(passiveRemark);
             } 
-            passiveNumQty += passiveItem.numQty;
+            passiveQuantity += passiveItem.quantity;
         }
 
         this.__passiveRemarks = passiveRemarks;
-        this.__passiveNumQty = passiveNumQty;
+        this.__passiveQuantity = passiveQuantity;
 
-        this.__numberDeForce._increaseFilteredItemCount(this.__officialCode, filteredNumQty);
+        this.__numberDeForce._increaseActiveQuantity(this.__code, activeQuantity);
+    }
+}
+
+export class BatchDeForce {
+
+    get tourDeForce() {
+        return this.__tourDeForce;
+    }
+
+    get index() {
+        return this.__index;
+    }
+    
+    get title() {
+        return this.__title;
+    }
+
+    get activeQuantity() {
+        return this.__activeQuantity;
+    }
+    
+    allNumbersDeForce() {
+        return this.__numberDeForceList.values();
+    }
+
+    preparationNumbersDeForce() {
+        return this.__preparationNumbers.values();
+    }
+    
+    constructor(tourDeForce, index, title, numberDeForceList) {
+        this.__tourDeForce = tourDeForce;
+        this.__index = index;
+        this.__title = title;
+        this.__numberDeForceList = numberDeForceList;
+        
+        const activeQuantityMap = new Map();
+        let activeQuantity = 0;
+        const preparationNumbers = [];
+        
+        for (const numberDeForce of numberDeForceList) {
+            if (numberDeForce.needsPreparation) {
+                preparationNumbers.push(numberDeForce);
+            }
+            for (const itemDeForce of numberDeForce.activeItemsDeForce()) {
+                const info = itemDeForce.info;
+                if (info.officialCode === null) {
+                    continue;
+                }
+                const code = info.code;
+                const activeQuantity = itemDeForce.activeQuantity;
+                if (!activeQuantityMap.has(code)) {
+                    activeQuantityMap.set(code, 0);
+                }
+                activeQuantityMap.set(code, activeQuantityMap.get(code) + activeQuantity);
+                this.__activeQuantity += activeQuantity;
+            }
+        }
+
+        this.__activeQuantityMap = activeQuantityMap;
+        this.__activeQuantity = activeQuantity;
+        this.__preparationNumbers = preparationNumbers;
+    }
+
+    *activeQuantities(includeZeroes) {
+        if (includeZeroes === undefined) {
+            includeZeroes = false;
+        }
+        const itemInfos = this.__tourDeForce.tour.tours.segments.itemInfos;
+        const activeQuantityMap = this.__activeQuantityMap;
+        for (const itemInfo of itemInfos.all()) {
+            const key = itemInfo.code;
+            const value = activeQuantityMap.get(key);
+            if (value === undefined) {
+                if (includeZeroes) {
+                    yield [key, 0];
+                }
+            } else {
+                yield [key, value];
+            }
+        }
     }
 }

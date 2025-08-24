@@ -21,7 +21,7 @@ import {
 	weekendBits,
 	allweekBits,
 	unparseDayBits,
-	parseNumQty,
+	parseQuantity,
 } from "./model.js";
 
 export function test(report) {
@@ -54,25 +54,25 @@ export function testItemInfos(report) {
 	const itemInfos = new ItemInfos(itemInfoDefs);
 
 	for (const itemInfo of itemInfos.all()) {
-		outputLine(`${itemInfo.officialCode}: ${itemInfo.name}`);
+		outputLine(`${itemInfo.code}: ${itemInfo.name}`);
 	}
 	
-	const telegraaf = itemInfos.forOfficialCode("TEL");
-	outputLine(`itemInfos.forOfficialCode("TEL") => ${telegraaf.officialCode}: ${telegraaf.name}`);
+	const telegraaf = itemInfos.forCode("TEL");
+	outputLine(`itemInfos.forCode("TEL") => ${telegraaf.code}: ${telegraaf.name}`);
 
 	try {
-		const noTelegraaf = itemInfos.forOfficialCode("Tel");
-		outputLine(`itemInfos.forOfficialCode("Tel") => ${noTelegraaf.officialCode}: ${noTelegraaf.name}`);
+		const noTelegraaf = itemInfos.forCode("Tel");
+		outputLine(`itemInfos.forCode("Tel") => ${noTelegraaf.code}: ${noTelegraaf.name}`);
 	} catch (err) {
-		outputLine(`itemInfos.forOfficialCode("Tel") => ${err}`);
+		outputLine(`itemInfos.forCode("Tel") => ${err}`);
 	}
 	
 	const trouw = itemInfos.forName("Trouw");
-	outputLine(`itemInfos.forName("Trouw") => ${trouw.officialCode}: ${trouw.name}`);
+	outputLine(`itemInfos.forName("Trouw") => ${trouw.code}: ${trouw.name}`);
 
 	try {
 		const noTrouw = itemInfos.forName("trouw");
-		outputLine(`itemInfos.forName("trouw") => ${noTrouw.officialCode}: ${noTrouw.name}`);
+		outputLine(`itemInfos.forName("trouw") => ${noTrouw.code}: ${noTrouw.name}`);
 	} catch (err) {
 		outputLine(`itemInfos.forName("trouw") => ${err}`);
 	}
@@ -105,8 +105,8 @@ function testStemmingParsing(report) {
 	testStreetNumber("1", "1");
 	testStreetNumber("10", "10"),
 	testStreetNumber("A", "Error: can't stem this street number: A"),
-	testStreetNumber("10 a", "10A"),
-	testStreetNumber("10 B", "10B"),
+	testStreetNumber("10 a", "10-A"),
+	testStreetNumber("10 B", "10-B"),
 	testStreetNumber("10 AA", "Error: can't stem this street number: 10 AA"),
 	
 	report.endSection("streetNumbers");
@@ -210,18 +210,18 @@ function testStemmingParsing(report) {
 
 	const testParseNumQty = (from, to) => {
 		try {
-			const numQty = parseNumQty(from);
+			const numQty = parseQuantity(from);
 			if (numQty !== to) {
-				outputLine(`parseNumQty(${from}) => ${numQty} !== ${to}`);
+				outputLine(`parseQuantity(${from}) => ${numQty} !== ${to}`);
 			} else {
-				outputLine(`parseNumQty(${from}) => ${numQty}`);
+				outputLine(`parseQuantity(${from}) => ${numQty}`);
 			}
 		} catch (err) {
 			const errStr = err.toString();
 			if (to !== errStr) {
-				outputLine(`parseNumQty(${from}) => ${errStr} !== ${to}`);
+				outputLine(`parseQuantity(${from}) => ${errStr} !== ${to}`);
 			} else {
-				outputLine(`parseNumQty(${from}) => ${errStr}`);
+				outputLine(`parseQuantity(${from}) => ${errStr}`);
 			}
 		}
 	}
@@ -324,6 +324,26 @@ const testSegmentDefs = [
             },
         ],
     },
+	{
+        officialSegment: null,
+        segment: "Saturday Batch-cuts",
+        streets: [
+            {
+                street: "Oonksweg",
+                town: "Borne",
+                numbers: [
+                    "  34 KS | pup | Kapschuur | mdwdvZz",
+                ],
+            },
+            {
+                street: "Hanzestraat", 
+                town: "Borne",
+                numbers: [
+                    "  0 ADK  | pup | Afdak | mdwdvZz",
+                ],
+            },
+        ],
+    },
 ];
 
 export function testSegments(report) {
@@ -344,7 +364,7 @@ export function testSegments(report) {
 			outputLine(`    ${street} ${number}, ${town}`);
 			for (const item of address.allItems()) {
 				const {
-					officialCode,
+					code,
 					info,
 					remark,
 					days,
@@ -352,7 +372,7 @@ export function testSegments(report) {
 					qty,
 					numQty,
 				} = item;
-				outputLine(`        ${officialCode} (${info.name}) | ${remark} | ${days} (${unparseDayBits(dayBits)}) | ${qty} (${numQty})`);
+				outputLine(`        ${code} (${info.name}) | ${remark} | ${days} (${unparseDayBits(dayBits)}) | ${qty} (${numQty})`);
 			}
 		}
 	}
@@ -365,7 +385,12 @@ const testTourDefs = [
         segments: [
             "Zenderen LR",
             "Borne West 41",
+			"Saturday Batch-cuts",
         ],
+		batchCuts: [
+			"Oonksweg 34-KS, Borne",
+            "Hanzestraat 0-ADK, Borne", 
+		],
         towns: [
             {
                 town: "Borne",
@@ -413,7 +438,7 @@ const testTourDefs = [
                 parts: [
                     {
                         street: "Loodijk",
-                        numbers: "2,1A,1",
+                        numbers: "2,1-A,1",
                     },
                     {
                         street: "Oonksweg",
@@ -427,11 +452,11 @@ const testTourDefs = [
                 parts: [
                     {
                         street: "Oonksweg",
-                        numbers: "35,35A,34,34A,36,36A,38A,38B,38,33,33A",
+                        numbers: "35,35-A,34,34-A,34-KS,36,36-A,38-A,38-B,38,33,33-A",
                     },
                     {
                         street: "Hanzestraat",
-                        numbers: "2,4,1,6B,8,10,3,5,7,9,12",
+                        numbers: "0-ADK,2,4,1,6-B,8,10,3,5,7,9,12",
                     },
                 ],
             },
@@ -440,7 +465,7 @@ const testTourDefs = [
                 parts: [
                     {
                         street: "Hanzestraat",
-                        numbers: "17,19,12A,12B,14,21,21A,21B,16,23,18,25,25A,25B,25C,25D,20,22,27,29,29A,31,33,24,24A,24B,35,37,37A",
+                        numbers: "17,19,12-A,12-B,14,21,21-A,21-B,16,23,18,25,25-A,25-B,25-C,25-D,20,22,27,29,29-A,31,33,24,24-A,24-B,35,37,37-A",
                     },
                 ],
             },
@@ -449,11 +474,11 @@ const testTourDefs = [
                 parts: [
                     {
                         street: "Gildestraat",
-                        numbers: "31,22,29,16,16A,18,20,14,14A,14B,27,27A,12,25,23..15,10,10A,13,8,8A,11,11A,6,6A,9,4,4A,7,7A,2,5",
+                        numbers: "31,22,29,16,16-A,18,20,14,14-A,14-B,27,27-A,12,25,23..15,10,10-A,13,8,8-A,11,11-A,6,6-A,9,4,4-A,7,7-A,2,5",
                     },
                     {
                         street: "Oonksweg",
-                        numbers: "24,24A,26,26A,28,28A,28B,28C,28D,28E,28F,28G,29,29A,29B,29C,25A,25,21,12,12A,10A,10,6,4,2",
+                        numbers: "24,24-A,26,26-A,28,28-A,28-B,28-C,28-D,28-E,28-F,28-G,29,29-A,29-B,29-C,25-A,25,21,12,12-A,10-A,10,6,4,2",
                     },
                 ],
             },
@@ -462,7 +487,7 @@ const testTourDefs = [
                 parts: [
                     {
                         street: "Prins Bernhardlaan",
-                        numbers: "138,140,142,144,144A,57,59,146A,146,146C,146D,61,148,63,65A,65,67",
+                        numbers: "138,140,142,144,144-A,57,59,146-A,146,146-C,146-D,61,148,63,65-A,65,67",
                     },
                 ],
             },
@@ -506,32 +531,87 @@ export function testTourDeForce(report) {
 
 	const tourDeForce = new TourDeForce(tour, "mdwdvZz");
 
-	console.log(tourDeForce);
+	for (const batchDeForce of tourDeForce.allBatchesDeForce()) {
+		outputLine(` `);
+		outputLine(`PREP FOR BATCH#${batchDeForce.index} (${batchDeForce.title})`);
+		outputLine(` `);
+		outputLine(`  Product |   Amount`);
+		outputLine(`  --------|---------`);
+		for (const [code, count] of batchDeForce.activeQuantities()) {
+			const codeWidth = 8;
+			const codeLength = code.length;
+			const codeOutdent = codeWidth - codeLength;
+			const lineParts = [];
+			lineParts.push("  ");
+			lineParts.push(code);
+			for (let i = 0; i < codeOutdent; i++) {
+				lineParts.push(" ");
+			}
+			lineParts.push("| ");
+			const countStr = `${count}`;
+			const countStrWidth = 8;
+			const countStrLength = countStr.length;
+			const countStrIndent = countStrWidth - countStrLength;
+			for (let i = 0; i < countStrIndent; i++) {
+				lineParts.push(" ");
+			}
+			lineParts.push(countStr);
+			const line = lineParts.join("");
+			outputLine(line);		
+		}
+		outputLine(` `);
+		for (const preparationNumberDeForce of batchDeForce.preparationNumbersDeForce()) {
+			let prepStr = "";
+			for (const itemDeForce of preparationNumberDeForce.allItemsDeForce()) {
+				prepStr += "[" + itemDeForce.code;
+				const quantity = itemDeForce.quantity;
+				if (quantity < 1 || quantity > 1) {
+					prepStr += ` (${quantity}x)`;
+				}
+				prepStr += "] ";
+			}
+			outputLine(`  ${preparationNumberDeForce.addressLine}: ${prepStr}`);
+		}
+	}
 	
+	outputLine(` `);	
+
+	for (const numberDeForce of tourDeForce.allNumbersDeForce()) {
+		if (numberDeForce.needsPreparation) {
+			console.log(numberDeForce);
+		}
+	}
+	
+	outputLine(`DELIVER`);
+	outputLine(` `);
 	for (const legDeForce of tourDeForce.allLegsDeForce()) {
 		outputLine(`  ========================================`)
-		outputLine(`  ${legDeForce.desc}:`);
+		outputLine(`  ${legDeForce.desc} (${legDeForce.activeQuantity}x)`);
 		for (const partDeForce of legDeForce.allPartsDeForce()) {
 			if (partDeForce.numberOfAddresses <= 0) {
 				continue;
 			}
 			outputLine(`    ----------------------------------------`)
 			if (partDeForce.townIsNecessary) {
-				outputLine(`    ${partDeForce.street}, ${partDeForce.town}:`)
+				outputLine(`    ${partDeForce.street}, ${partDeForce.town} (${partDeForce.activeQuantity}x)`)
 			} else {
-				outputLine(`    ${partDeForce.street}:`)
+				outputLine(`    ${partDeForce.street} (${partDeForce.activeQuantity}x)`)
 			}
 			for (const numberDeForce of partDeForce.allNumbersDeForce()) {
-				const unstemmedAndAlignedStreetNumber = unstemAndAlignStreetNumber(numberDeForce.number, 3, 1, 4);
+				const firstInBatch = numberDeForce.firstInBatch;
 				const indent = "      ";
-				let line = indent;
+				let line = 
+					(firstInBatch !== null) 
+					? `#${firstInBatch.index}    `
+					: indent;
+				const unstemmedAndAlignedStreetNumber = unstemAndAlignStreetNumber(numberDeForce.number, 3, 1, 4);
 				line += unstemmedAndAlignedStreetNumber;
 				for (const itemDeForce of numberDeForce.activeItemsDeForce()) {
-					line += ` ${itemDeForce.officialCode}`;
+					line += ` ${itemDeForce.code}`;
 					if (itemDeForce.filteredNumQty < 1 || itemDeForce.filteredNumQty > 1) {
 						line += ` (${itemDeForce.filteredNumQty}x)`;
 					}
-					for (const remark of itemDeForce.filteredRemarks) {
+					for (const remark of itemDeForce.activeRemarks) {
 						line += " | " + remark; 
 					}
 					for (const remark of itemDeForce.passiveRemarks) {
@@ -545,11 +625,11 @@ export function testTourDeForce(report) {
 					line += "        ";
 				}
 				for (const itemDeForce of numberDeForce.passiveItemsDeForce()) {
-					line += `-${itemDeForce.officialCode}`;
+					line += `-${itemDeForce.code}`;
 					if (itemDeForce.filteredNumQty < 1 || itemDeForce.filteredNumQty > 1) {
 						line += ` (${itemDeForce.filteredNumQty}x)`;
 					}
-					for (const remark of itemDeForce.filteredRemarks) {
+					for (const remark of itemDeForce.activeRemarks) {
 						line += " | " + remark; 
 					}
 					for (const remark of itemDeForce.passiveRemarks) {
@@ -566,7 +646,4 @@ export function testTourDeForce(report) {
 		}
 	}
 
-	for (const [officialCode, count] of tourDeForce.filteredItemCounts()) {
-		outputLine(`${officialCode}: ${count}`);		
-	}
 }
