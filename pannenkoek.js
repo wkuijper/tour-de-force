@@ -362,7 +362,7 @@ export const tourDefs = [
                     },
                     {
                         street: "Vaaltweg",
-                        numbers: "2"          
+                        numbers: "2,4"          
                     },
                     {
                         street: "Bornerbroeksestraat",
@@ -393,7 +393,7 @@ export const tourDefs = [
                 parts: [
                     {
                         street: "Bornerbroeksestraat",
-                        numbers: "103,70-A,103-A,105"          
+                        numbers: "103,70-A,103-A,103-B,105"          
                     },
                     {
                         street: "Sint Jozefweg",
@@ -407,7 +407,7 @@ export const tourDefs = [
                 parts: [  
                     {
                         street: "Bornerbroeksestraat",
-                        numbers: "107,72,74,109,111"          
+                        numbers: "107,72,74,109,111,115"          
                     },
                     {
                         street: "Braamhaarstraat",
@@ -420,7 +420,7 @@ export const tourDefs = [
                 parts: [  
                     {
                         street: "Retraitehuisweg",
-                        numbers: "1,2"          
+                        numbers: "1,1-A,2"          
                     },
                 ],
             },
@@ -438,7 +438,7 @@ export const tourDefs = [
                 parts: [  
                     {
                         street: "Lidwinaweg",
-                        numbers: "25,25-A,44,44-A,46,46-A,23,23-A,23-B,21,21-A,19,17-A,17,15-A,15,13-A,13,11,9,7,5-B,5-A,5,3,8..34,40,42"          
+                        numbers: "50,27,25,25-A,44,44-A,46,46-A,23,23-A,23-B,21,21-A,19,17-A,17,15-A,15,13-A,13,11,9,7,5-B,5-A,5,3,8..34,40,42"          
                     },
                     {
                         street: "Zeilkerweg",
@@ -487,11 +487,24 @@ export const tourDefs = [
                 ],
             },
             {
+                desc: "Hoofdstraat & Reefsweg",
+                parts: [  
+                    {
+                        street: "Hoofdstraat",
+                        numbers: "131,131-B,127,123,62,60,60-A,121,119"          
+                    },
+                    {
+                        street: "Reefsweg",
+                        numbers: "1,3,5,8,6,4,2",          
+                    },
+                ],
+            },
+            {
                 desc: "Hoofdstraat & Albergerweg",
                 parts: [  
                     {
                         street: "Hoofdstraat",
-                        numbers: "131,131-B,127,123,62,60,60-A,121,119,117,58,56,54,109,107,105,52,50,103,101,99,97,48,46,95,93,91,44,89,87,85,81,79,38,36,34,69,67,65,32,30-A,30,28,59-A,59,57,26-A,26,24"          
+                        numbers: "117,58,56,54,109,107,105,52,50,103,101,99,97,48,46,95,93,91,44,89,87,85,81,79,38,36,34,69,67,65,32,30-A,30,28,59-A,59,57,26-A,26,24"          
                     },
                     {
                         street: "Albergerweg",
@@ -617,7 +630,7 @@ export const tourDefs = [
                 parts: [
                     {
                         street: "Loodijk",
-                        numbers: "2,1-A,1",
+                        numbers: "3,2,1-A,1",
                     },
                     {
                         street: "Oonksweg",
