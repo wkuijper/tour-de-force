@@ -39,7 +39,8 @@ export const segmentDefs = [
                 street: "Oonksweg",
                 town: "Borne",
                 numbers: [
-                    "  42   | HFD",
+                    "  42   | HFD | stop 24-8 | mdwdvzz",
+                    "  42   | TT HE",
                     "  50   | TT HE",
                 ],
             },
@@ -47,7 +48,8 @@ export const segmentDefs = [
                 street: "Loodijk",
                 town: "Borne",
                 numbers: [
-                    "   1   | HFD",
+                    "   1   | HFD | stop 24-8 | mdwdvzz",
+                    "   1   | TT HE",
                     "   3   | TT HE",
                     "   2   | TT HE",
                 ],
@@ -86,11 +88,13 @@ export const segmentDefs = [
                 street: "Braamhaarstraat", 
                 town: "Zenderen",
                 numbers: [
-                    "   6   | NRC",
+                    "   6   | NRC | stop 24-8 | mdwdvzz",
+                    "   6   | TT HE",
                     "   8   | TT HE",
                     "  10   | TT HE",
                     "   1 A | TT HE",
-                    "   3   | VK",
+                    "   3   | VK | stop 24-8 | mdwdvzz",
+                    "   3   | TT HE",
                 ],
             },
             {
@@ -125,8 +129,8 @@ export const segmentDefs = [
                 street: "Zeilkerweg",
                 town: "Zenderen",
                 numbers: [
-                    "   1   | TT HE | Westendorp",
                     "   1   | TT HE | Welberg",
+                    "   1   | TT HE | Westendorp",
                     "   8   | TT HE",
                     "  10   | TT HE",
                     "  12   | TT HE",
@@ -143,7 +147,7 @@ export const segmentDefs = [
                 street: "Prinsenweg",
                 town: "Zenderen",
                 numbers: [
-                    "   6   | TT HE",
+                    "   6   | TT HE | stop 28-8 | mdwdvzz",
                     "  10   | TT HE",
                     "  14   | TT HE",
                     "   9   | TT HE",
@@ -211,7 +215,7 @@ export const segmentDefs = [
                 street: "Karmelhof",
                 town: "Zenderen",
                 numbers: [
-                    "  11   | VK",
+                    "  11   | VK | stop 24-8 | mdwdvzz",
                 ],
             },
             {
@@ -238,8 +242,8 @@ export const segmentDefs = [
                 town: "Zenderen",
                 numbers: [
                     "  40   | TT HE",
-                    "  46   | TR    | Kuil",
                     "  46   | TR    | Karmeliet...",
+                    "  46   | TR    | Kuil",
                     "  46   | TT HE | Paters Ca...",
                     "  46   | VK    | Karmeliet...",
                 ],
@@ -294,7 +298,7 @@ export const segmentDefs = [
                 street: "Prins Bernhardlaan", 
                 town: "Borne",
                 numbers: [
-                    "  61   | TT HE",
+                    "  61   | TT HE | stop!24-8 | mdwdvzz",
                 ],
             },
         ],
