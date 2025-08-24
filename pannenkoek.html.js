@@ -29,6 +29,14 @@ function tourDeForce() {
 	//window.onbeforeunload = (evt) => {
 	//	return "Are you sure?";
 	//}
+
+	document.body.ondblclick = (evt) => {
+		if (document.body.style.background === "black") {
+			document.body.style.background = "pink";	
+		} else {
+			document.body.style.background = "black";
+		}
+	};
 	
 	document.body.style.font = "16pt monospace";
 	document.body.style.color = "white";
@@ -36,7 +44,6 @@ function tourDeForce() {
 	document.body.style.width = "720px";
 	document.body.style.marginLeft = "auto";
 	document.body.style.marginRight = "auto";
-	
 	
 	const controlPanelDivE = document.createElement("div");
 	document.body.appendChild(controlPanelDivE);
