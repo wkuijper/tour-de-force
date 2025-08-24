@@ -33,6 +33,10 @@ function tourDeForce() {
 	document.body.style.font = "16pt monospace";
 	document.body.style.color = "white";
 	document.body.style.background = "black";
+	document.body.style.width = "720px";
+	document.body.style.marginLeft = "auto";
+	document.body.style.marginRight = "auto";
+	
 	
 	const controlPanelDivE = document.createElement("div");
 	document.body.appendChild(controlPanelDivE);
