@@ -8,6 +8,7 @@ import {
 	TourDeForce,
 	stemStreetNumber,
 	unstemAndAlignStreetNumber,
+	splitStemmedStreetNumber,
 	stemTownName,
 	parseDayBits,
 	mondayBit,
@@ -24,11 +25,11 @@ import {
 	parseQuantity,
 } from "./model.js";
 
-function tourDeForce(fontSize, bgColor, fgColor) {
+function tourDeForce(fontSize, bgColor, fgColor, days) {
 
-	window.onbeforeunload = (evt) => {
+	/*window.onbeforeunload = (evt) => {
 		return "Are you sure?";
-	}
+	}*/
 
 	document.body.onclick = (evt) => {
 		evt.preventDefault();
@@ -160,7 +161,7 @@ function tourDeForce(fontSize, bgColor, fgColor) {
 
 	const tour = tours.forName("Dubbele Pannenkoek");
 
-	const tourDeForce = new TourDeForce(tour, new Date());
+	const tourDeForce = new TourDeForce(tour, new Date(), days);
 
 	output(`TOUR DE FORCE`, true, true);
 	
@@ -248,10 +249,29 @@ function tourDeForce(fontSize, bgColor, fgColor) {
 			const line = lineParts.join("");
 			output(line);		
 		}
+		
 		output(` `);
+		const tourDayBits = tourDeForce.dayBits;
 		for (const preparationNumberDeForce of batchDeForce.preparationNumbersDeForce()) {
 			output(`  ${preparationNumberDeForce.addressLine}:`);
-			let prepStr = "    ";
+			for (const itemDeForce of preparationNumberDeForce.activeItemsDeForce()) {
+				let line = "    ";
+				let codeQuantityStr = itemDeForce.code;
+				const quantity = itemDeForce.activeQuantity;
+				codeQuantityStr += (quantity < 1 || quantity > 1) ? ` x${quantity}` : "";
+				line += codeQuantityStr;
+				const codeQuantityLength = codeQuantityStr.length;
+				const codeQuantityOutdent = Math.max(1, 8 - codeQuantityLength);
+				for (let i = 0; i < codeQuantityOutdent; i++) {
+					line += " ";
+				}
+				const dayBits = itemDeForce.dayBits;
+				if (dayBits !== allweekBits) {
+					line += itemDeForce.days;
+				}
+				output(line);
+			}
+			/*let prepStr = "    ";
 			for (const itemDeForce of preparationNumberDeForce.allItemsDeForce()) {
 				if (itemDeForce.activeQuantity === 0) {
 					continue;
@@ -263,7 +283,7 @@ function tourDeForce(fontSize, bgColor, fgColor) {
 				}
 				prepStr += "] ";
 			}
-			output(prepStr);
+			output(prepStr);*/
 			output(` `);
 		}
 	}
@@ -286,38 +306,117 @@ function tourDeForce(fontSize, bgColor, fgColor) {
 				output(`    ${partDeForce.street} (${partDeForce.activeQuantity}x)`)
 			}
 			for (const numberDeForce of partDeForce.allNumbersDeForce()) {
+				
 				const firstInBatch = numberDeForce.firstInBatch;
-				const indent = "      ";
-				let line = 
-					(firstInBatch !== null) 
-					? `#${firstInBatch.index}    `
-					: indent;
-				const unstemmedAndAlignedStreetNumber = unstemAndAlignStreetNumber(numberDeForce.number, 3, 1, 4);
-				line += unstemmedAndAlignedStreetNumber;
+				const indent = "    ";
+				let line;
+				if (firstInBatch !== null) {
+					const tagStr = `#${firstInBatch.index}`;
+					line = tagStr;
+					const outdent = Math.max(1, indent.length - tagStr.length);
+					for (let i = 0; i < outdent; i++) {
+						line += " ";
+					}
+				} else {
+					line = indent;
+				}
+
+				const [decimalNumber, suffix] = splitStemmedStreetNumber(numberDeForce.number);
+				
+				const optionalyPrefixedDecimalNumStr = 
+					(numberDeForce.activeQuantity === 0) ? `-${decimalNumber}` : `${decimalNumber}`;
+
+				const optionalyPrefixedDecimalNumStrLength = optionalyPrefixedDecimalNumStr.length;
+				const optionalyPrefixedDecimalNumStrIndent = Math.max(0, 5 - optionalyPrefixedDecimalNumStrLength);
+
+				for (let i = 0; i < optionalyPrefixedDecimalNumStrIndent; i++) {
+					line += " ";
+				}
+				line += optionalyPrefixedDecimalNumStr;
+				line += " ";
+				line += suffix;
+
+				const suffixLength = suffix.length;
+				const suffixOutdent = Math.max(1, 3 - suffixLength);
+
+				for (let i = 0; i < suffixOutdent; i++) {
+					line += " ";
+				}
+				
 				for (const itemDeForce of numberDeForce.activeItemsDeForce()) {
-					if (itemDeForce.needsPreparation) {
+					/*if (itemDeForce.needsPreparation) {
 						line += "!";
 					} else {
 						line += " ";
-					}
-					line += `${itemDeForce.code}`;
+					}*/
+					
+					let codeQuantityStr = " ";
+					codeQuantityStr += `${itemDeForce.code}`;
+					
 					if (itemDeForce.activeQuantity < 1 || itemDeForce.activeQuantity > 1) {
-						line += ` (${itemDeForce.activeQuantity}x)`;
+						codeQuantityStr += ` x${itemDeForce.activeQuantity}`;
 					}
+
+					line += codeQuantityStr;
+					
+					const codeQuantityLength = codeQuantityStr.length;
+					const codeQuantityOutdent = Math.max(0, 8 - codeQuantityLength);
+
+					for (let i = 0; i < codeQuantityOutdent; i++) {
+						line += " ";
+					}
+					
+					if (itemDeForce.dayBits !== allweekBits) {
+						line += " " + itemDeForce.days;
+					}
+					
 					for (const remark of itemDeForce.activeRemarks) {
 						line += " | " + remark; 
 					}
 					for (const remark of itemDeForce.passiveRemarks) {
 						line += " |-" + remark; 
 					}
-					if (itemDeForce.days !== null) {
-						line += " | " + itemDeForce.days;
+					output(line);
+					line = indent;
+					line += "         ";
+				}
+				for (const itemDeForce of numberDeForce.passiveItemsDeForce()) {
+					/*if (itemDeForce.needsPreparation) {
+						line += "!";
+					} else {
+						line += " ";
+					}*/
+					let codeQuantityStr = "-";
+					codeQuantityStr += `${itemDeForce.code}`;
+					
+					if (itemDeForce.passiveQuantity < 1 || itemDeForce.passiveQuantity > 1) {
+						codeQuantityStr += ` x${itemDeForce.passiveQuantity}`;
+					}
+
+					line += codeQuantityStr;
+					
+					const codeQuantityLength = codeQuantityStr.length;
+					const codeQuantityOutdent = Math.max(0, 8 - codeQuantityLength);
+
+					for (let i = 0; i < codeQuantityOutdent; i++) {
+						line += " ";
+					}
+					
+					if (itemDeForce.dayBits !== allweekBits) {
+						line += " " + itemDeForce.days;
+					}
+					
+					for (const remark of itemDeForce.activeRemarks) {
+						line += " | " + remark; 
+					}
+					for (const remark of itemDeForce.passiveRemarks) {
+						line += " |-" + remark; 
 					}
 					output(line);
 					line = indent;
-					line += "        ";
+					line += "         ";
 				}
-				for (const itemDeForce of numberDeForce.passiveItemsDeForce()) {
+				/*for (const itemDeForce of numberDeForce.passiveItemsDeForce()) {
 					line += `-${itemDeForce.code}`;
 					if (itemDeForce.activeQuantity < 1 || itemDeForce.activeQuantity > 1) {
 						line += ` (${itemDeForce.activeQuantity}x)`;
@@ -334,14 +433,13 @@ function tourDeForce(fontSize, bgColor, fgColor) {
 					output(line);
 					line = indent;
 					line += "        ";
-				}
+				}*/
 			}
 		}
 	}
 
 }
 
-//tourDeForce("8pt", "white", "black");
-
+//tourDeForce("8pt", "white", "black", "MDWDVZZ");
 
 tourDeForce("16pt", "rgb(50,50,50)", "white");

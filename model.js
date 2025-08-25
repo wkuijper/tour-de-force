@@ -17,6 +17,16 @@ export function stemStreetNumber(streetNumber) {
 
 const stemmedStreetNumberRegExp = new RegExp("^(0|[1-9][0-9]*)(-[0-9A-Z]+)?$");
 
+export function splitStemmedStreetNumber(stemmedStreetNumber) {
+    const match = stemmedStreetNumberRegExp.exec(stemmedStreetNumber);
+    if (match === null) {
+        throw new Error(`can't unstem this street number: ${stemmedStreetNumber}`)
+    }
+    const numericPart = match[1];
+    const optionalAlphanumericPart = match[2] ? match[2].slice(1) : "";
+    return [numericPart, optionalAlphanumericPart];
+}
+
 export function unstemAndAlignStreetNumber(stemmedStreetNumber, numericPartWidth, interSpacing, alphanumericPartWidth) {
     const match = stemmedStreetNumberRegExp.exec(stemmedStreetNumber);
     if (match === null) {
@@ -212,11 +222,16 @@ export class ItemInfos {
             throw new Error(`duplicate item name: ${name}`);
         }
         this.__nameMap.set(name, itemInfo);
+        const officialCode = itemInfo.officialCode;
+        if (officialCode !== null) {
+            this.__officialCodeToCodeMap.set(officialCode, code);
+        }
     }
     
     constructor(itemDefs) {
         this.__codeMap = new Map();
         this.__nameMap = new Map();
+        this.__officialCodeToCodeMap = new Map();
         for (const itemDef of itemDefs) {
             const itemInfo = new ItemInfo(this, itemDef);
         }
@@ -241,6 +256,10 @@ export class ItemInfos {
             throw new Error(`unknown item name: ${name}`);
         }
         return this.__nameMap.get(name);
+    }
+
+    officialCodeToCode(officialCode) {
+        return this.__officialCodeToCodeMap.get(officialCode);
     }
 }
 
@@ -378,12 +397,14 @@ export class Segment {
         for (const numberDef of numbers) {
             const numberParts = numberDef.split("|").map((part) => part.trim());
             const numberPart = numberParts.length > 0 ? numberParts[0] : null;
-            const codePart = numberParts.length > 1 ? numberParts[1] : null;
+            const officialCodePart = numberParts.length > 1 ? numberParts[1] : null;
             const remarkPart = numberParts.length > 2 ? numberParts[2] : null;
             const daysPart = numberParts.length > 3 ? numberParts[3] : null;
             const qtyPart = numberParts.length > 4 ? numberParts[4] : null;
             const address = this.__getOrDeclareAddress(street, numberPart, town);
-            address.addItem(codePart, remarkPart, daysPart, qtyPart);
+            const itemInfos = this.__segments.itemInfos;
+            const code = itemInfos.officialCodeToCode(officialCodePart);
+            address.addItem(code, remarkPart, daysPart, qtyPart);
         }
     }
 
@@ -1275,15 +1296,15 @@ export class NumberDeForce {
     }
     
     get needsPreparation() {
-        return this.__address.needsPreparation;
+        return this.__needsPreparation;
     }
     
     get needsDelivery() {
-        return this.__address.needsDelivery;
+        return this.__needsDelivery;
     }
     
     get needsPickup() {
-        return this.__address.needsPickup;
+        return this.__needsPickup;
     }
 
     get activeQuantity() {
@@ -1300,34 +1321,53 @@ export class NumberDeForce {
     
     constructor(partDeForce, streetPartNumber, address) {
         this.__activeQuantityMap = new Map();
-        this.__activeQuantities = 0;
+        this.__activeQuantity = 0;
         
         this.__partDeForce = partDeForce;
         this.__streetPartNumber = streetPartNumber;
         this.__address = address;
 
-        const itemMap = new Map();
+        const tourDeForce = partDeForce.legDeForce.tourDeForce;
+        const tourDayBits = tourDeForce.dayBits;
+        
+        const itemCodeMap = new Map();
         for (const item of address.allItems()) {
             const code = item.code;
-            if (!itemMap.has(code)) {
-                itemMap.set(code, []);
+            if (!itemCodeMap.has(code)) {
+                itemCodeMap.set(code, new Map());
             }
-            itemMap.get(code).push(item);
+            const itemDayBitsMap = itemCodeMap.get(code);
+            const itemDayBits = item.dayBits;
+            //const relevantDayBits = itemDayBits & tourDayBits;
+            if (!itemDayBitsMap.has(itemDayBits)) {
+                itemDayBitsMap.set(itemDayBits, []);
+            }
+            itemDayBitsMap.get(itemDayBits).push(item);
         }
 
-        const itemDeForceMap = new Map();
-        for (const [code, itemList] of itemMap.entries()) {
-            const itemDeForce = new ItemDeForce(this, itemList);
-            itemDeForceMap.set(code, itemDeForce);
+        const itemDeForceList = [];
+        const itemDeForceCodeMap = new Map();
+        for (const [code, itemDayBitsMap] of itemCodeMap.entries()) {
+            if (!itemDeForceCodeMap.has(code)) {
+                itemDeForceCodeMap.set(code, new Map());
+            }
+            const itemDeForceDayBitsMap = itemDeForceCodeMap.get(code);
+            for (const [dayBits, itemList] of itemDayBitsMap.entries()) {
+                const itemDeForce = new ItemDeForce(this, code, dayBits, itemList);
+                if (itemDeForceDayBitsMap.has(dayBits)) {
+                    throw new Error(`invariant violation`);
+                }
+                itemDeForceDayBitsMap.set(dayBits, itemDeForce);
+                itemDeForceList.push(itemDeForce);
+            }
         }
 
-        this.__itemDeForceMap = itemDeForceMap;
+        this.__itemDeForceCodeMap = itemDeForceCodeMap;
 
-        const itemDeForceList = [...itemDeForceMap.values()];
         if (itemDeForceList.length > 1) {
             itemDeForceList.sort((a, b) => a.info.order - b.info.order);
         }
-        
+
         this.__itemDeForceList = itemDeForceList;
 
         const activeItemDeForceList = [];
@@ -1343,6 +1383,21 @@ export class NumberDeForce {
         this.__passiveItemDeForceList = passiveItemDeForceList;
         this.__activeItemDeForceList = activeItemDeForceList;
 
+        let needsPreparation = false;
+        let needsDelivery = false;
+        let needsPickup = false;
+
+        for (const itemDeForce of activeItemDeForceList) {
+            needsPreparation = needsPreparation || itemDeForce.needsPreparation;
+            needsDelivery = needsDelivery || itemDeForce.needsDelivery;
+            needsPickup = needsPickup || itemDeForce.needsPickup;
+        }
+        
+        this.__needsPreparation = needsPreparation;
+        this.__needsDelivery = needsDelivery;
+        this.__needsPickup = needsPickup;
+
+        
         this._firstInBatch = null;
     }
     
@@ -1444,29 +1499,26 @@ export class ItemDeForce {
         return this.__needsPickup;
     }
     
-    constructor(numberDeForce, itemList) {
+    constructor(numberDeForce, code, dayBits, itemList) {
         this.__numberDeForce = numberDeForce;
+        this.__code = code;
+        this.__dayBits = dayBits;
 
         if (itemList.length > 1) {
             itemList.sort((a, b) => a.order - b.order);
         }
         
         this.__itemList = itemList;
-        
-        const firstItem = itemList[0];
 
-        this.__code = firstItem.code;
-        this.__info = firstItem.info;
-        
         const tourDeForce = numberDeForce.partDeForce.legDeForce.tourDeForce;
+        const itemInfos = tourDeForce.tour.tours.segments.itemInfos;
+            
+        this.__info = itemInfos.forCode(code);
+        
         const tourDayBits = tourDeForce.dayBits;
 
         const unfilteredRemarks = [];
         let unfilteredQuantity = 0;
-        let dayBits = 0;
-        let needsPreparation = false;
-        let needsDelivery = false;
-        let needsPickup = false;
 
         for (const item of itemList) {
             const remark = item.remark;
@@ -1474,17 +1526,10 @@ export class ItemDeForce {
                 unfilteredRemarks.push(remark);
             } 
             unfilteredQuantity += item.quantity;
-            dayBits |= item.dayBits;
-            needsPreparation = needsPreparation || item.needsPreparation;
-            needsDelivery = needsDelivery || item.needsDelivery;
-            needsPickup = needsPickup || item.needsPickup;
         }
 
         this.__dayBits = dayBits;
-        this.__days = (dayBits === allweekBits ? null : unparseDayBits(dayBits));
-        this.__needsPreparation = needsPreparation;
-        this.__needsDelivery = needsDelivery;
-        this.__needsPickup = needsPickup;
+        this.__days = unparseDayBits(dayBits);
         
         this.__unfilteredRemarks = unfilteredRemarks;
         this.__unfilteredQuantity = unfilteredQuantity;
@@ -1502,6 +1547,20 @@ export class ItemDeForce {
 
         this.__passiveItemList = passiveItemList;
         this.__activeItemList = activeItemList;
+
+        let needsPreparation = false;
+        let needsDelivery = false;
+        let needsPickup = false;
+
+        for (const item of activeItemList) {
+            needsPreparation = needsPreparation || item.needsPreparation;
+            needsDelivery = needsDelivery || item.needsDelivery;
+            needsPickup = needsPickup || item.needsPickup;
+        }
+        
+        this.__needsPreparation = needsPreparation;
+        this.__needsDelivery = needsDelivery;
+        this.__needsPickup = needsPickup;
         
         const activeRemarks = [];
         let activeQuantity = 0;

@@ -47,7 +47,7 @@ export const itemInfoDefs = [
       },
       {
             officialCode: "TT HE",
-            code: "TT HE",
+            code: "HE",
             name: "Tubantia Hengelo",
             order: 6,
             needsPreparation: false,
@@ -56,7 +56,7 @@ export const itemInfoDefs = [
       },
       {
             officialCode: "TT AM",
-            code: "TT AM",
+            code: "AM",
             name: "Tubantia Almelo",
             order: 7,
             needsPreparation: true,
