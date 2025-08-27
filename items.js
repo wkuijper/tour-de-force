@@ -1,7 +1,7 @@
 export const itemInfoDefs = [
       {
             officialCode: "HFD",
-            code: "HFD",
+            code: "FD",
             name: "Het Financieele Dagblad",
             order: 1,
             needsPreparation: true,
