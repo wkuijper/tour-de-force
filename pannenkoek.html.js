@@ -440,6 +440,6 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 
 }
 
-//tourDeForce("8pt", "white", "black", "MDWDVZZ");
+tourDeForce("8pt", "white", "black", "MDWDVZZ");
 
-tourDeForce("16pt", "rgb(50,50,50)", "white");
+//tourDeForce("16pt", "rgb(50,50,50)", "white");

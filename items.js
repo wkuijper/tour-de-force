@@ -64,6 +64,15 @@ export const itemInfoDefs = [
             needsPickup: false,
       },
       {
+            officialCode: "AD NL",
+            code: "AD",
+            name: "Algemeen Dagblad",
+            order: 8,
+            needsPreparation: true,
+            needsDelivery: true,
+            needsPickup: false,
+      },
+      {
             officialCode: null,
             code: "pup",
             name: "Pick-up Weekend Batch",

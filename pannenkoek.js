@@ -29,6 +29,7 @@ export const segmentDefs = [
                     "  36   | TT HE",
                     "  44   | TT HE",
                     "  52   | TT HE",
+                    "  54   | AD NL",
                     "   7   | TT HE",
                     "  13   | TT HE",
                     "  23   | TT HE",
@@ -58,7 +59,8 @@ export const segmentDefs = [
                 street: "Meester Thienweg", 
                 town: "Zenderen",
                 numbers: [
-                    "   1   | TT HE",
+                    "   1   | NRC | Geerding | mdwDVZz",
+                    "   1   | TT HE | geerdink",
                     "   4   | TT HE",
                 ],
             },
@@ -194,6 +196,7 @@ export const segmentDefs = [
                 numbers: [
                     "   2   | TT HE",
                     "   4   | TT HE",
+                    "   6   | VK | mdwdvZz",
                 ],
             },
             {
