@@ -14,6 +14,7 @@ export const segmentDefs = [
                     " 107   | TT HE",
                     " 109   | TT HE",
                     " 115   | TT HE",
+                    " 103   | VK | | mdwdvZz",
                     " 103 B | TT HE",
                 ],
             },
@@ -21,11 +22,13 @@ export const segmentDefs = [
                 street: "Hoofdstraat",
                 town: "Zenderen",
                 numbers: [
+                    "   6 A | TT HE | | mdwdvZz",
                     "  20   | HFD",
                     "  20   | TT HE",
                     "  24   | TT HE",
                     "  28   | TT HE",
                     "  30 a | TT HE",
+                    "  32   | TT HE | | mdwdvZz",
                     "  36   | TT HE",
                     "  44   | TT HE",
                     "  52   | TT HE",
@@ -72,6 +75,7 @@ export const segmentDefs = [
                     "   4   | TEL",
                     "   4   | TT HE",
                     "   6   | TT HE",
+                    "   8   | TT HE | | mdwdvZz"
                 ],
             },
             {
@@ -111,14 +115,20 @@ export const segmentDefs = [
                 town: "Zenderen",
                 numbers: [
                     "   4   | TT HE",
-                    "   6   | TT HE",
+                    "   6   | NRC | KUIPERS | mdwdvZz",
+                    "   6   | TT HE | Kuipers",
+                    "  12   | TT HE | | mdwdvZz",
                     "  26   | TT HE",
+                    "  30   | TT HE | | mdwdvZz",
+                    "  34   | TT HE | | mdwdvZz",
                     "  46 A | TT HE",
                     "  50   | TT HE",
                     "   1 A | TT HE",
                     "  13 A | TT HE",
                     "  15   | TT HE",
                     "  15 A | TT HE",
+                    "  17   | HFD | J.c. Morp... dhr. J.C. Smid | mdwdvZz",
+                    "  17   | TEL | Smid | mdwdvZz",
                     "  17 A | TT HE",
                     "  19   | TT HE",
                     "  21   | TEL    | AANN BEDR...",
@@ -133,8 +143,10 @@ export const segmentDefs = [
                 numbers: [
                     "   1   | TT HE | Welberg",
                     "   1   | TT HE | Westendorp",
+                    "   1   | VK    | Welberg | mdwdvZz",
                     "   8   | TT HE",
                     "  10   | TT HE",
+                    "  12   | TEL | | mdwdvZz",
                     "  12   | TT HE",
                 ],
             },
@@ -151,7 +163,9 @@ export const segmentDefs = [
                 numbers: [
                     "   6   | TT HE | stop 28-8 | mdwdvzz",
                     "  10   | TT HE",
+                    "  12   | HFD | | mdwdvZz",
                     "  14   | TT HE",
+                    "   9   | TEL | | mdwdvZz",
                     "   9   | TT HE",
                 ],
             },
@@ -185,6 +199,7 @@ export const segmentDefs = [
                 numbers: [
                     "   4   | TT HE",
                     "  10   | TT HE",
+                    "  14   | TT HE | | mdwdvZz",
                     "  18   | TT HE",
                     "  20   | TT HE",
                     "  13   | TT HE",
@@ -196,7 +211,9 @@ export const segmentDefs = [
                 numbers: [
                     "   2   | TT HE",
                     "   4   | TT HE",
-                    "   6   | VK | mdwdvZz",
+                    "   6   | VK | Merk  | mdwdvZz",
+                    "   6   | VK | Boxum | mdwdvZz",
+                    "  12   | TT HE | | mdwdvZz",
                 ],
             },
             {
@@ -211,6 +228,7 @@ export const segmentDefs = [
                 street: "Zenderensestraat",
                 town: "Zenderen",
                 numbers: [
+                    "   5   | TT HE | mdwdvZz",
                     "   9   | VK",
                 ],
             },
@@ -225,6 +243,7 @@ export const segmentDefs = [
                 street: "Karmelhof",
                 town: "Zenderen",
                 numbers: [
+                    "   5   | TT HE | | mdwdvZz",
                     "  11   | TT HE",
                     "  13   | TEL",
                     "  13   | TT HE",
@@ -236,7 +255,9 @@ export const segmentDefs = [
                 town: "Zenderen",
                 numbers: [
                     "   4   | TT HE",
-                    "   5   | TT HE",
+                    "   4 A | TT HE | | mdwdvZz",
+                    "   5   | HFD | Handelond... | mdwdvZz",
+                    "   5   | TT HE | Heijdens",
                     "   8   | TT AM",
                 ],
             },
@@ -244,6 +265,7 @@ export const segmentDefs = [
                 street: "Hertmerweg", 
                 town: "Zenderen",
                 numbers: [
+                    "  38   | TR    | | mdwdvZz",
                     "  40   | TT HE",
                     "  46   | TR    | Karmeliet...",
                     "  46   | TR    | Kuil",
@@ -272,11 +294,20 @@ export const segmentDefs = [
                 ],
             },
             {
+                street: "Ambachtstraat",
+                town: "Borne",
+                numbers: [
+                    "  16   | TT HE | mdwdvZz",
+                    "  12   | TT HE | mdwdvZz",
+                ],
+            },
+            {
                 street: "Hanzestraat",
                 town: "Borne",
                 numbers: [
                     "  21   | HFD | Kok | MDWDVzz",
                     "  21   | TEL | Senator BE Kok",
+                    "  23   | TT HE | | mdwdvZz",
                     "  37   | TT HE",
                 ],
             },
@@ -302,6 +333,7 @@ export const segmentDefs = [
                 town: "Borne",
                 numbers: [
                     "  61   | TT HE | stop!24-8 | mdwdvzz",
+                    "  61   | TEL   | | mdwdvZz",
                 ],
             },
         ],
@@ -328,6 +360,7 @@ export const tourDefs = [
                     "Hanzestraat",
                     "Gildestraat",
                     "Prins Bernhardlaan",
+                    "Ambachtstraat",
                 ],
             },
             {
@@ -355,7 +388,6 @@ export const tourDefs = [
                     "Meester Thienweg",
                     "Sint Jozefweg",
                     "Sint Stephanusstraat",
-                    "Ambachtstraat",
                 ],
             },
         ],
