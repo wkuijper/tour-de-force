@@ -277,7 +277,7 @@ export const segmentDefs = [
                 street: "Vaaltweg",
                 town: "Borne",
                 numbers: [
-                    "   4   | TT HE",
+                    "   4   | TT HE | stop-1-9 | mdwdvzz",
                 ],
             },
         ],
@@ -297,8 +297,8 @@ export const segmentDefs = [
                 street: "Ambachtstraat",
                 town: "Borne",
                 numbers: [
-                    "  16   | TT HE | mdwdvZz",
-                    "  12   | TT HE | mdwdvZz",
+                    "  16   | TT HE | | mdwdvZz",
+                    "  12   | TT HE | | mdwdvZz",
                 ],
             },
             {
