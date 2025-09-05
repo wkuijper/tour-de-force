@@ -161,7 +161,7 @@ export const segmentDefs = [
                 street: "Prinsenweg",
                 town: "Zenderen",
                 numbers: [
-                    "   6   | TT HE | stop 28-8 | mdwdvzz",
+                    "   6   | TT HE",// | stop 28-8 | mdwdvzz",
                     "  10   | TT HE",
                     "  12   | HFD | | mdwdvZz",
                     "  14   | TT HE",
@@ -317,6 +317,7 @@ export const segmentDefs = [
                 numbers: [
                     "  22   | TT HE",
                     "  31   | TT HE",
+                    "  29   | TT HE",
                     "  13   | TEL",
                 ],
             },

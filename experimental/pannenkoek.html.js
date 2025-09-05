@@ -161,7 +161,7 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 
 	const tour = tours.forName("Dubbele Pannenkoek");
 
-	const tourDeForce = new TourDeForce(tour, new Date());
+	const tourDeForce = new TourDeForce(tour, new Date(), days);
 
 	output(`TOUR DE FORCE`, true, true);
 	
@@ -225,32 +225,36 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 		output(` `);
 		output(`PREP FOR BATCH #${batchDeForce.index} (${batchDeForce.title})`, true, true);
 		output(` `);
-		output(`  Product |   Amount`);
-		output(`  --------|---------`);
-		for (const [code, count] of batchDeForce.activeQuantities()) {
-			const codeWidth = 8;
-			const codeLength = code.length;
-			const codeOutdent = codeWidth - codeLength;
-			const lineParts = [];
-			lineParts.push("  ");
-			lineParts.push(code);
-			for (let i = 0; i < codeOutdent; i++) {
-				lineParts.push(" ");
+		
+		for (const batchCountClusterDeForce of batchDeForce.countClustersDeForce()) {
+			output(`  ${batchCountClusterDeForce.days:`);
+			output(`      Product |   Amount`);
+			output(`      --------|---------`);
+			for (const [code, count] of batchCountClusterDeForce.activeQuantities()) {
+				const codeWidth = 8;
+				const codeLength = code.length;
+				const codeOutdent = codeWidth - codeLength;
+				const lineParts = [];
+				lineParts.push("  ");
+				lineParts.push(code);
+				for (let i = 0; i < codeOutdent; i++) {
+					lineParts.push(" ");
+				}
+				lineParts.push("| ");
+				const countStr = `${count}`;
+				const countStrWidth = 8;
+				const countStrLength = countStr.length;
+				const countStrIndent = countStrWidth - countStrLength;
+				for (let i = 0; i < countStrIndent; i++) {
+					lineParts.push(" ");
+				}
+				lineParts.push(countStr);
+				const line = lineParts.join("");
+				output(line);		
 			}
-			lineParts.push("| ");
-			const countStr = `${count}`;
-			const countStrWidth = 8;
-			const countStrLength = countStr.length;
-			const countStrIndent = countStrWidth - countStrLength;
-			for (let i = 0; i < countStrIndent; i++) {
-				lineParts.push(" ");
-			}
-			lineParts.push(countStr);
-			const line = lineParts.join("");
-			output(line);		
+			output(` `);
 		}
 		
-		output(` `);
 		const tourDayBits = tourDeForce.dayBits;
 		for (const preparationNumberDeForce of batchDeForce.preparationNumbersDeForce()) {
 			output(`  ${preparationNumberDeForce.addressLine}:`);

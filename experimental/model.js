@@ -1,3 +1,21 @@
+function _createZeroDayQuantityVec() {
+    return [0, 0, 0, 0, 0, 0, 0];
+}
+
+function _createDayQuantityVec(dayBits, quantity) {
+    const vec = _createZeroDayQuantityVec();
+    for (let day = 0; day < 7; day++) {
+        vec[day] = (((1 << day) & dayBits) !== 0) ? quantity : 0;
+    }
+    return vec;
+}
+
+function _increaseDayQuantityVec(vec, additionVec) {
+    for (let day = 0; day < 7; day++) {
+        vec[day] = vec[day] + additionVec[day];
+    }
+}
+
 const streetNumberRegExp = new RegExp("^(0|[1-9][0-9]*)( [0-9A-Za-z]+)?$");
 
 export function stemStreetNumber(streetNumber) {
@@ -982,7 +1000,7 @@ export class TourDeForce {
         this.__tour = tour;
         this.__date = date;
         
-        const day = (date.getDay()+6)%7;
+        const day = date.getDay();
         
         let dateDays = "mdwdvzz";
         if (day === 0) {
@@ -1111,13 +1129,12 @@ export class TourDeForce {
         return this.__legsDeForce.values();
     }
 
-    _increaseActiveQuantity(code, additionalCount) {
+    _increaseActiveQuantity(code, additionalCount, additionalCountVec) {
         if (!this.__activeQuantityMap.has(code)) {
-            this.__activeQuantityMap.set(code, 0);
+            this.__activeQuantityMap.set(code, _createZeroDayQuantityVec());
         }
-        const prevCount = this.__activeQuantityMap.get(code);
-        const nextCount = prevCount + additionalCount;
-        this.__activeQuantityMap.set(code, nextCount);
+        const counts = this.__activeQuantityMap.get(code);
+        _increaseDayQuantityVec(counts, additionalCountVec);
         this.__activeQuantity += additionalCount;
     }
     
@@ -1178,16 +1195,15 @@ export class LegDeForce {
             yield* partDeForce.allNumbersDeForce();
         }
     }
-    
-    _increaseActiveQuantity(code, additionalCount) {
+
+     _increaseActiveQuantity(code, additionalCount, additionalCountVec) {
         if (!this.__activeQuantityMap.has(code)) {
-            this.__activeQuantityMap.set(code, 0);
+            this.__activeQuantityMap.set(code, _createZeroDayQuantityVec());
         }
-        const prevCount = this.__activeQuantityMap.get(code);
-        const nextCount = prevCount + additionalCount;
-        this.__activeQuantityMap.set(code, nextCount);
+        const counts = this.__activeQuantityMap.get(code);
+        _increaseDayQuantityVec(counts, additionalCountVec);
         this.__activeQuantity += additionalCount;
-        this.__tourDeForce._increaseActiveQuantity(code, additionalCount);
+        this.__tourDeForce._increaseActiveQuantity(code, additionalCount, additionalCountVec);
     }
 }
 
@@ -1248,16 +1264,15 @@ export class PartDeForce {
     allNumbersDeForce() {
         return this.__numbersDeForce.values();
     }
-    
-    _increaseActiveQuantity(code, additionalCount) {
+
+    _increaseActiveQuantity(code, additionalCount, additionalCountVec) {
         if (!this.__activeQuantityMap.has(code)) {
-            this.__activeQuantityMap.set(code, 0);
+            this.__activeQuantityMap.set(code, _createZeroDayQuantityVec());
         }
-        const prevCount = this.__activeQuantityMap.get(code);
-        const nextCount = prevCount + additionalCount;
-        this.__activeQuantityMap.set(code, nextCount);
+        const counts = this.__activeQuantityMap.get(code);
+        _increaseDayQuantityVec(counts, additionalCountVec);
         this.__activeQuantity += additionalCount;
-        this.__legDeForce._increaseActiveQuantity(code, additionalCount);
+        this.__legDeForce._increaseActiveQuantity(code, additionalCount, additionalCountVec);
     }
 }
 
@@ -1413,15 +1428,14 @@ export class NumberDeForce {
         return this.__activeItemDeForceList.values();
     }
 
-    _increaseActiveQuantity(code, additionalCount) {
+    _increaseActiveQuantity(code, additionalCount, additionalCountVec) {
         if (!this.__activeQuantityMap.has(code)) {
-            this.__activeQuantityMap.set(code, 0);
+            this.__activeQuantityMap.set(code, _createZeroDayQuantityVec());
         }
-        const prevCount = this.__activeQuantityMap.get(code);
-        const nextCount = prevCount + additionalCount;
-        this.__activeQuantityMap.set(code, nextCount);
+        const counts = this.__activeQuantityMap.get(code);
+        _increaseDayQuantityVec(counts, additionalCountVec);
         this.__activeQuantity += additionalCount;
-        this.__partDeForce._increaseActiveQuantity(code, additionalCount);
+        this.__partDeForce._increaseActiveQuantity(code, additionalCount, additionalCountVec);
     }
 }
 
@@ -1563,18 +1577,24 @@ export class ItemDeForce {
         this.__needsPickup = needsPickup;
         
         const activeRemarks = [];
+        let activeQuantityPerDay = _createZeroDayQuantityVec();
         let activeQuantity = 0;
-
+        
         for (const activeItem of activeItemList) {
             const activeRemark = activeItem.remark;
             if (activeRemark !== null) {
                 activeRemarks.push(activeRemark);
             } 
             activeQuantity += activeItem.quantity;
+            const itemQuantityPerDay = activeItem.activeQuantityPerDay;
+            for (let i = 0; i < 7; i++) {
+                activeQuantityPerDay[i] = activeQuantityPerDay[i] + itemQuantityPerDay[i];
+            }
         }
 
         this.__activeRemarks = activeRemarks;
         this.__activeQuantity = activeQuantity;
+        this.__activeQuantityPerDay = activeQuantityPerDay;
 
         const passiveRemarks = [];
         let passiveQuantity = 0;
@@ -1589,8 +1609,8 @@ export class ItemDeForce {
 
         this.__passiveRemarks = passiveRemarks;
         this.__passiveQuantity = passiveQuantity;
-
-        this.__numberDeForce._increaseActiveQuantity(this.__code, activeQuantity);
+        
+        this.__numberDeForce._increaseActiveQuantity(this.__code, activeQuantity, activeQuantityPerDay);
     }
 }
 
@@ -1625,11 +1645,11 @@ export class BatchDeForce {
         this.__index = index;
         this.__title = title;
         this.__numberDeForceList = numberDeForceList;
-        
+
         const activeQuantityMap = new Map();
         let activeQuantity = 0;
         const preparationNumbers = [];
-        
+
         for (const numberDeForce of numberDeForceList) {
             if (numberDeForce.needsPreparation) {
                 preparationNumbers.push(numberDeForce);
@@ -1640,11 +1660,17 @@ export class BatchDeForce {
                     continue;
                 }
                 const code = info.code;
-                const activeQuantity = itemDeForce.activeQuantity;
                 if (!activeQuantityMap.has(code)) {
-                    activeQuantityMap.set(code, 0);
+                    activeQuantityMap.set(code, _createZeroDayQuantityVec());
                 }
-                activeQuantityMap.set(code, activeQuantityMap.get(code) + activeQuantity);
+                const counts = activeQuantityMap.get(code);
+                const activeQuantity = itemDeForce.activeQuantity;
+                const itemDayBits = itemDeForce.dayBits;
+                for (let day = 0; day < 7; day++) {
+                    if (((1 << day) & itemDayBits) !== 0) {
+                     counts[day] = counts[day] + activeQuantity;
+                    }
+                }
                 this.__activeQuantity += activeQuantity;
             }
         }
@@ -1652,14 +1678,27 @@ export class BatchDeForce {
         this.__activeQuantityMap = activeQuantityMap;
         this.__activeQuantity = activeQuantity;
         this.__preparationNumbers = preparationNumbers;
+
+        const activeQuantityMapPerDay = [
+            new Map(), new Map(), new Map(), new Map(), new Map(), new Map(), new Map()    
+        ];
+
+        for (const [code, activeQuantityPerDay] of activeQuantityMap) {
+            for (let day = 0; day < 7; day++) {
+                
+            }
+        }
     }
 
-    *activeQuantities(includeZeroes) {
+    *activeQuantities(day, includeZeroes) {
+        if (day < 0 || day >= 7) {
+            throw new Error(`day out of range: ${day}`);
+        }
         if (includeZeroes === undefined) {
             includeZeroes = false;
         }
         const itemInfos = this.__tourDeForce.tour.tours.segments.itemInfos;
-        const activeQuantityMap = this.__activeQuantityMap;
+        const activeQuantityMap = this.__activeQuantityMapPerDay[day];
         for (const itemInfo of itemInfos.all()) {
             const key = itemInfo.code;
             const value = activeQuantityMap.get(key);
@@ -1672,4 +1711,34 @@ export class BatchDeForce {
             }
         }
     }
+}
+
+export class BatchCountClusterDeForce {
+
+    get days() {
+        return this.__days;
+    }
+
+    get dayBits() {
+        return this.__dayBits;
+    }
+    
+    constructor(batchDeForce, dayBits) {
+        this.__batchDeForce = batchDeForce;
+        this.__dayBits = dayBits;
+        this.__days = unparseDayBits(dayBits);
+        let representativeDay = 0;
+        while (((1 << representativeDay) & dayBits) === 0) {
+            representativeDay++;
+            if (representativeDay >= 7) {
+                throw new Error(`batch count cluster is empty: ${this.__days}`);
+            }
+        }
+        this.__representativeDay = representativeDay;
+    }
+
+    *activeQuantities(includeZeroes) {
+        yield* this.__batchDeForce.activeQuantities(this.__representativeDay, includeZeroes);
+    }
+    
 }
