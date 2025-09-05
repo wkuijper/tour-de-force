@@ -31,14 +31,14 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 		return "Are you sure?";
 	}*/
 
-	document.body.onclick = (evt) => {
+	/*document.body.onclick = (evt) => {
 		evt.preventDefault();
 		if (document.body.style.background !== "green") {
 			document.body.style.background = "green";	
 		} else {
 			document.body.style.background = bgColor;
 		}
-	};
+	};*/
 	
 	document.body.style.font = `${fontSize} sans-serif`;
 	document.body.style.color = fgColor;
@@ -49,6 +49,37 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 	
 	const controlPanelDivE = document.createElement("div");
 	document.body.appendChild(controlPanelDivE);
+
+	//
+	
+	const toursDropDownDivE = document.createElement("div");
+	controlPanelDivE.appendChild(toursDropDownDivE);
+	
+	toursDropDownDivE.style.marginTop = "8px";
+	toursDropDownDivE.style.marginRight = "8px";
+	toursDropDownDivE.style.marginBottom = "8px";
+	toursDropDownDivE.style.font = `${fontSize} sans-serif`;
+	
+	const toursDropDownSelectE = document.createElement("select");
+	toursDropDownDivE.appendChild(toursDropDownSelectE);
+	toursDropDownSelectE.style.font = `${fontSize} sans-serif`;
+	toursDropDownSelectE.style.background = bgColor;
+	toursDropDownSelectE.style.color = fgColor;
+	
+	const toursOptions = [
+		["Dubbele Pannenkoek", "Dubbele Pannenkoek"],
+		["Sterren Pannenkoek", "Sterren Pannenkoek"],
+	];
+
+	for (const [title, value] of toursOptions) {
+		const optionE = document.createElement("option");
+		toursDropDownSelectE.appendChild(optionE);
+		optionE.style.font = `${fontSize} sans-serif`;
+		optionE.innerText = title;
+		optionE.value = value;
+	}
+
+	//
 	
 	const daysDropDownDivE = document.createElement("div");
 	controlPanelDivE.appendChild(daysDropDownDivE);
@@ -65,15 +96,15 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 	daysDropDownSelectE.style.color = fgColor;
 	
 	const daysOptions = [
-		["Today", undefined],
-		["Monday", "mdwdvzz"],
-		["Tuesday", "mdwdvzz"],
-		["Wednesday", "mdwdvzz"],
-		["Thursday", "mdwdvzz"],
-		["Friday", "mdwdvzz"],
-		["Saturday", "mdwdvzz"],
-		["Sunday", "mdwdvzz"],
-		["Weekday", "MDWDVZZ"],
+		["Today", "undefined"],
+		["Monday", "Mdwdvzz"],
+		["Tuesday", "mDwdvzz"],
+		["Wednesday", "mdWdvzz"],
+		["Thursday", "mdwDvzz"],
+		["Friday", "mdwdVzz"],
+		["Saturday", "mdwdvZz"],
+		["Sunday", "mdwdvzZ"],
+		["Weekday", "MDWDVzz"],
 		["Weekend--", "mdwdvZZ"],
 		["Weekend++", "mdwdVZZ"],
 		["Anyday", "MDWDVZZ"],
@@ -89,7 +120,7 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 
 	//
 	
-	const mutationDivE = document.createElement("div");
+	/*const mutationDivE = document.createElement("div");
 	controlPanelDivE.appendChild(mutationDivE);
 	
 	mutationDivE.style.marginTop = "8px";
@@ -119,7 +150,7 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 	applyButtonE.style.color = "white";
 	applyButtonE.style.width = "100%";
 	applyButtonE.style.height = "100px";
-	applyButtonE.innerText = "GO";
+	applyButtonE.innerText = "GO";*/
 
 	//
 	
@@ -128,9 +159,43 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 
 	controlPanelDivE.style.marginBottom = "20px";
 	
-	controlPanelDivE.style.display = "none";
+	//controlPanelDivE.style.display = "none";
 	
 	//
+
+	const containerE = document.createElement("div");
+	document.body.appendChild(containerE);
+
+	const update = () => {
+		
+		containerE.innerHTML = ``;
+
+		const tourName = 
+			toursDropDownSelectE.value === "undefined" 
+			? undefined 
+			: toursDropDownSelectE.value;
+		
+		const days = 
+			daysDropDownSelectE.value === "undefined" 
+			? undefined 
+			: daysDropDownSelectE.value;
+
+		generate(containerE, fontSize, bgColor, fgColor, tourName, days);
+	};
+
+	/*applyButtonE.onclick = (evt) => {
+		update();
+	};*/
+	toursDropDownSelectE.onchange = (evt) => {
+		update();
+	};
+	daysDropDownSelectE.onchange = (evt) => {
+		update();
+	};
+	update();
+}
+
+function generate(containerE, fontSize, bgColor, fgColor, tourName, days) {
 	
 	const output = (text, lineAbove, lineBelow) => {
 		if (lineAbove === undefined) {
@@ -150,7 +215,7 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 		preE.style.marginBottom = "4px";
 		
 		preE.innerText = text;
-		document.body.appendChild(preE);
+		containerE.appendChild(preE);
 	};
 	
 	const itemInfos = new ItemInfos(itemInfoDefs);
@@ -159,9 +224,9 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 
 	const tours = new Tours(segments, tourDefs);
 
-	const tour = tours.forName("Dubbele Pannenkoek");
+	const tour = tours.forName(tourName);
 
-	const tourDeForce = new TourDeForce(tour, new Date());
+	const tourDeForce = new TourDeForce(tour, new Date(), days);
 
 	output(`TOUR DE FORCE`, true, true);
 	

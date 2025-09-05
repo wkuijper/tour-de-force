@@ -1000,7 +1000,7 @@ export class TourDeForce {
         this.__tour = tour;
         this.__date = date;
         
-        const day = date.getDay();
+        const day = (date.getDay() + 6) % 7; // sunday (0) becomes 6 and monday (6) becomes 0
         
         let dateDays = "mdwdvzz";
         if (day === 0) {

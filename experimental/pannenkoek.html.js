@@ -227,7 +227,7 @@ function tourDeForce(fontSize, bgColor, fgColor, days) {
 		output(` `);
 		
 		for (const batchCountClusterDeForce of batchDeForce.countClustersDeForce()) {
-			output(`  ${batchCountClusterDeForce.days:`);
+			output(`  ${batchCountClusterDeForce.days}:`);
 			output(`      Product |   Amount`);
 			output(`      --------|---------`);
 			for (const [code, count] of batchCountClusterDeForce.activeQuantities()) {
