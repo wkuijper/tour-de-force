@@ -228,7 +228,7 @@ export const segmentDefs = [
                 street: "Zenderensestraat",
                 town: "Zenderen",
                 numbers: [
-                    "   5   | TT HE | mdwdvZz",
+                    "   5   | TT HE | | mdwdvZz",
                     "   9   | VK",
                 ],
             },
@@ -333,7 +333,7 @@ export const segmentDefs = [
                 street: "Prins Bernhardlaan", 
                 town: "Borne",
                 numbers: [
-                    "  61   | TT HE | stop!24-8 | mdwdvzz",
+                    "  61   | TT HE",
                     "  61   | TEL   | | mdwdvZz",
                 ],
             },
