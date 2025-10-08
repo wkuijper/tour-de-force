@@ -227,7 +227,7 @@ export const segmentDefs = [
                 street: "Loodijk",
                 town: "Borne",
                 numbers: [
-                    "   1   | HFD | stop 24-8 | mdwdvzz",
+                    //"   1   | HFD | stop 24-8 | mdwdvzz",
                     "   1   | TT HE",
                     "   3   | TT HE",
                     "   2   | TT HE",
@@ -269,12 +269,12 @@ export const segmentDefs = [
                 street: "Braamhaarstraat", 
                 town: "Zenderen",
                 numbers: [
-                    "   6   | NRC | stop 24-8 | mdwdvzz",
+                    //"   6   | NRC | stop 24-8 | mdwdvzz",
                     "   6   | TT HE",
                     "   8   | TT HE",
                     "  10   | TT HE",
                     "   1 A | TT HE",
-                    "   3   | VK | stop 24-8 | mdwdvzz",
+                    //"   3   | VK | stop 24-8 | mdwdvzz",
                     "   3   | TT HE",
                 ],
             },
@@ -387,7 +387,7 @@ export const segmentDefs = [
                     "   2   | TT HE",
                     "   4   | TT HE",
                     "   6   | VK | Merk  | mdwdvZz",
-                    "   6   | VK | Boxum | mdwdvZz",
+                    //"   6   | VK | Boxum | mdwdvZz",
                     "  12   | TT HE | | mdwdvZz",
                 ],
             },
@@ -407,13 +407,13 @@ export const segmentDefs = [
                     "   9   | VK",
                 ],
             },
-            {
+            /*{
                 street: "Karmelhof",
                 town: "Zenderen",
                 numbers: [
                     "  11   | VK | stop 24-8 | mdwdvzz",
                 ],
-            },
+            },*/
             {
                 street: "Karmelhof",
                 town: "Zenderen",
@@ -448,13 +448,13 @@ export const segmentDefs = [
                     "  46   | VK    | Karmeliet...",
                 ],
             },
-            {
+            /*{
                 street: "Vaaltweg",
                 town: "Borne",
                 numbers: [
                     "   4   | TT HE | stop-1-9 | mdwdvzz",
                 ],
-            },
+            },*/
         ],
     },
     {
