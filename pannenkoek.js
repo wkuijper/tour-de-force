@@ -14,7 +14,7 @@ export const segmentDefs = [
                 ],
             },
             {
-                street: "'t Stegehuis",
+                street: "Het Stegehuis",
                 town: "Zenderen",
                 numbers: [
                     " 10   | TT HE",
@@ -52,7 +52,7 @@ export const segmentDefs = [
                     "  2 | TT HE",
                     "  6 | TT HE",
                     "  8 | TT HE",
-                    " 10 | AD    | | mdwdvZz",
+                    " 10 | AD NL | | mdwdvZz",
                     " 10 | TT HE",
                     " 12 | TT HE",
                     " 16 | TT HE",
@@ -566,7 +566,7 @@ export const tourDefs = [
                     "Sint Jozefweg",
                     "Sint Stephanusstraat",
                     "De Kostee",
-                    "'t Stegehuis",
+                    "Het Stegehuis",
                     "Hoge Maat",
                     "Het Saalkinck",
                     "De Reimer",
@@ -684,8 +684,9 @@ export const tourDefs = [
                     },  
                     {
                         street: "Erve Timmerman",
-                        numbers: "1,2,3,4,5,6,7,8,10,9,12,11,13,14,16,18,15,17,20,19,21,22,24,23,26,",          
-                    },{
+                        numbers: "1,2,3,4,5,6,7,8,10,9,12,11,13,14,16,18,15,17,20,19,21,22,24,23,26",          
+                    },
+                    {
                         street: "Erve Escher",
                         numbers: "14,16,18,20,22,22-A,24,19,21,23,25,27,29",          
                     },
@@ -695,11 +696,11 @@ export const tourDefs = [
                     }, 
                     {
                         street: "Elsdijk",
-                        numbers: "1-B,15,13,",          
+                        numbers: "1-B,15,13",          
                     }, 
                     {
                         street: "Duivenslag",
-                        numbers: "5,6,6-A,4,3,2,1,7,8,9,10,11,12,13,",          
+                        numbers: "5,6,6-A,4,3,2,1,7,8,9,10,11,12,13",          
                     }, 
                     {
                         street: "Elsdijk",
@@ -707,11 +708,11 @@ export const tourDefs = [
                     }, 
                     {
                         street: "Lidwinaweg",
-                        numbers: "24..2,2-A,2-B,1",
+                        numbers: "24..2,2-A,2-B,1,1-A,1-B",
                     },
                     {
                         street: "Schoolstraat",
-                        numbers: "6,4,2,1,3,5",
+                        numbers: "6,6-A,4,2,1,3,5",
                     },
                     {
                         street: "Het Hulscher",
@@ -739,7 +740,7 @@ export const tourDefs = [
                     },
                     {
                         street: "Lidwinaweg",
-                        numbers: "3,5,5-A,5-B,7,9,11,13,26,13-A,15,28,30,32,34",
+                        numbers: "3,5,5-A,5-B,7,9,11,13,26,13-A,15,28,30,32,34,15-A",
                     }
                 ],
             },
@@ -810,7 +811,7 @@ export const tourDefs = [
                 parts: [  
                     {
                         street: "Hoofdstraat",
-                        numbers: "117,58,56,54,109,107,105,52,50,103,101,99,97,48,46,95,93,91,44,89,87,85,81,79,38,36,34,69,67,65,32,30-A,30,28,59-A,59,57,26-A,26,24"          
+                        numbers: "117,113,111,58,56,54,109,107,105,52,50,103,101,99,97,48,46,95,93,91,44,89,87,85,81,79,38,36,34,69,67,65,32,30-A,30,28,59-A,59,57,26-A,26,24"          
                     },
                     {
                         street: "Albergerweg",
@@ -862,15 +863,11 @@ export const tourDefs = [
                 ],
             },
             {
-                desc: "Hoofdstraat & Lidwinaweg",
+                desc: "Hoofdstraat",
                 parts: [
                     {
                         street: "Hoofdstraat",
                         numbers: "18,18-A,20,55-A,55,53,51,49,47,45,43",
-                    },
-                    {
-                        street: "Lidwinaweg",
-                        numbers: "2,2-A,2-B,4,6,1-A,1",
                     },
                 ],
             },
