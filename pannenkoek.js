@@ -94,7 +94,7 @@ export const segmentDefs = [
                 ],
             },
             {
-                street: "de Haar",
+                street: "De Haar",
                 town: "Zenderen",
                 numbers: [
                     "  6 | TT HE",
@@ -571,7 +571,7 @@ export const tourDefs = [
                     "Het Saalkinck",
                     "De Reimer",
                     "Het Hulscher",
-                    "de Haar",
+                    "De Haar",
                     "Schoolstraat",
                     "Duivenslag",
                     "Elsdijk",
@@ -663,12 +663,89 @@ export const tourDefs = [
                 ],
             },
             {
-                desc: "Lidwinaweg & Zeilkerweg",
+                desc: "Lidwinaweg",
                 parts: [  
                     {
                         street: "Lidwinaweg",
-                        numbers: "50,27,25,25-A,44,44-A,46,46-A,23,23-A,23-B,21,21-A,19,17-A,17,15-A,15,13-A,13,11,9,7,5-B,5-A,5,3,8..34,40,42"          
+                        numbers: "50,27,25,25-A,44,44-A,46,46-A,23,23-A,23-B,21,21-A,19,17-A,17,40,42",          
                     },
+                ],
+            },
+            {
+                desc: "Kern",
+                parts: [  
+                    {
+                        street: "Erve Oosterveld",
+                        numbers: "2,4,6,8,1,10,12,7,9,16,14",          
+                    },  
+                    {
+                        street: "Erve Escher",
+                        numbers: "2,1,4,3,5,6,8,7,10,12,9,11",          
+                    },  
+                    {
+                        street: "Erve Timmerman",
+                        numbers: "1,2,3,4,5,6,7,8,10,9,12,11,13,14,16,18,15,17,20,19,21,22,24,23,26,",          
+                    },{
+                        street: "Erve Escher",
+                        numbers: "14,16,18,20,22,22-A,24,19,21,23,25,27,29",          
+                    },
+                    {
+                        street: "Erve Oosterveld",
+                        numbers: "23,25,27,29,31,28,26,24,22,20,18,11,13,15,17,19,21",          
+                    }, 
+                    {
+                        street: "Elsdijk",
+                        numbers: "1-B,15,13,",          
+                    }, 
+                    {
+                        street: "Duivenslag",
+                        numbers: "5,6,6-A,4,3,2,1,7,8,9,10,11,12,13,",          
+                    }, 
+                    {
+                        street: "Elsdijk",
+                        numbers: "11,9,7,1,3,5,2",          
+                    }, 
+                    {
+                        street: "Lidwinaweg",
+                        numbers: "24..2,2-A,2-B,1",
+                    },
+                    {
+                        street: "Schoolstraat",
+                        numbers: "6,4,2,1,3,5",
+                    },
+                    {
+                        street: "Het Hulscher",
+                        numbers: "7..25,27,29,31",
+                    },
+                    {
+                        street: "De Kostee",
+                        numbers: "16..2",
+                    },
+                    {
+                        street: "Het Saalkinck",
+                        numbers: "1..17,16..2",
+                    },
+                    {
+                        street: "De Reimer",
+                        numbers: "1..15,12..2",
+                    },
+                    {
+                        street: "Het Hulscher",
+                        numbers: "10,8",
+                    },
+                    {
+                        street: "De Haar",
+                        numbers: "5..15,24..2",
+                    },
+                    {
+                        street: "Lidwinaweg",
+                        numbers: "3,5,5-A,5-B,7,9,11,13,26,13-A,15,28,30,32,34",
+                    }
+                ],
+            },
+            {
+                desc: "Zeilkerweg",
+                parts: [
                     {
                         street: "Zeilkerweg",
                         numbers: "1,1-A,8"          
@@ -737,7 +814,24 @@ export const tourDefs = [
                     },
                     {
                         street: "Albergerweg",
-                        numbers: "4,10,5,7,9,12,14,16,11,18,18-A,20,13"          
+                        numbers: "4,10,5,7,9,12,14,16,11,18,18-A,20,13"        
+                    },
+                ],
+            },
+            {
+                desc: "Stegehuis & Hoge Maat",
+                parts: [
+                    {
+                        street: "Het Stegehuis",
+                        numbers: "1..27,27-A,29..35,20..10",
+                    },
+                    {
+                        street: "Hoge Maat",
+                        numbers: "31..25,40..30,28-A,28,23,26,21,19,17,24,15,22,13,20,11,18,16,14,12,9,10,8,7,6,4,2,5,3,1",
+                    },
+                    {
+                        street: "Het Stegehuis",
+                        numbers: "6,4,2",
                     },
                 ],
             },
