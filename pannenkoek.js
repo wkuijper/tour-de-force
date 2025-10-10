@@ -20,11 +20,21 @@ export const segmentDefs = [
                     " 10   | TT HE",
                     " 20   | TT HE",
                     "  1   | TT HE",
+                    "  3   | TT HE | | mdwdvZz",
+                    "  5   | TT HE | | mdwdvZz",
                     "  7   | TT HE",
                     " 15   | TT HE",
                     " 19   | TT HE",
                     " 21   | TT HE",
-                    " 25   | TT HE",   
+                    " 25   | TT HE",
+                    " 27   | TT HE | | mdwdvZz"
+                ],
+            },
+            {
+                street: "Erve Kokenberg",
+                town: "Zenderen",
+                numbers: [
+                    " 3 | TT HE | | mdwdvZz"  
                 ],
             },
             {
@@ -32,15 +42,18 @@ export const segmentDefs = [
                 town: "Zenderen",
                 numbers: [
                     " 39 A | TT HE",
-                    " 47   | TT HE",
+                    " 47   | TT AM",
                     " 69   | TT HE",
                     " 81   | TT HE",
+                    " 93   | TT HE | | mdwdvZz",
                     " 97   | TT HE",
+                    "105   | TT HE | | mdwdvZz",
                     "107   | TT HE",
                     "109   | TEL",
                     "111   | TT HE",
                     "113   | TT HE",
-                    "119   | TT HE",   
+                    "119   | TT HE",
+                    "123   | TT HE | | mdwdvZz",
                 ],
             },
             {
@@ -52,13 +65,14 @@ export const segmentDefs = [
                     "  2 | TT HE",
                     "  6 | TT HE",
                     "  8 | TT HE",
-                    " 10 | AD NL | | mdwdvZz",
+                    " 10 | AD NL | | MdwdvZz",
                     " 10 | TT HE",
                     " 12 | TT HE",
                     " 16 | TT HE",
                     " 20 | TT HE",
                     " 24 | TT HE",
                     " 28 | TT HE",
+                    " 36 | TT HE | | mdwdvZz",
                 ],
             },
             {
@@ -75,8 +89,10 @@ export const segmentDefs = [
                     "  1 | TT HE",
                     "  5 | TT HE",
                     "  9 | TT HE",
+                    " 13 | TT HE | | mdwdvZz",
                     "  8 | TEL",
                     "  8 | TT HE",
+                    " 10 | TT HE | | mdwdvZz",
                     " 12 | TT HE",
                 ],
             },
@@ -89,6 +105,7 @@ export const segmentDefs = [
                     " 19 | TT HE",
                     " 21 | TT HE",
                     " 29 | TT HE",
+                    " 31 | TT HE | | mdwdvZz",
                     "  8 | TT HE",
                     " 10 | TT HE",
                 ],
@@ -99,6 +116,7 @@ export const segmentDefs = [
                 numbers: [
                     "  6 | TT HE",
                     " 20 | TT HE",
+                    " 22 | TT HE | | mdwdvZz",
                 ],
             },
             {
@@ -114,6 +132,7 @@ export const segmentDefs = [
                 street: "Duivenslag",
                 town: "Zenderen",
                 numbers: [
+                    "  3 | TT HE | | mdwdvZz",
                     "  7 | TT HE",
                     " 11 | TT HE",
                     "  2 | TT HE",
@@ -142,6 +161,9 @@ export const segmentDefs = [
                     " 19 | TT HE",
                     " 25 | TT HE",
                     " 29 | TT HE",
+                    "  6 | TT HE | | mdwdvZz",
+                    " 14 | VK    | | mdwdvZz",
+                    " 16 | TT HE | | mdwdvZz",
                     " 18 | TT HE",
                 ],
             },
@@ -149,6 +171,7 @@ export const segmentDefs = [
                 street: "Erve Escher",
                 town: "Zenderen",
                 numbers: [
+                    "  3 | TEL | | mdwdvZz",
                     "  3 | TT HE",
                     "  7 | TT HE",
                     "  9 | TEL",
@@ -158,6 +181,8 @@ export const segmentDefs = [
                     "  4 | TT HE",
                     "  8 | TT HE",
                     " 12 | TT HE",
+                    " 18 | TT HE | | mdwdvZz",
+                    " 20 | TT HE",
                 ],
             },
             {
@@ -165,10 +190,14 @@ export const segmentDefs = [
                 town: "Zenderen",
                 numbers: [
                     "  4 | TT HE",
+                    " 14 | TT HE | | mdwdvZz",
                     " 20 | TT HE",
+                    " 26 | TT HE | | mdwdvZz",
                     "  1 | TT HE",
                     "  3 | TT HE",
+                    " 11 | TEL   | | mdwdVZz",
                     " 11 | TT HE",
+                    " 13 | TEL   | | mdwdvZz",
                     " 13 | TT HE",
                 ],
             },
@@ -207,7 +236,7 @@ export const segmentDefs = [
                     "  36   | TT HE",
                     "  44   | TT HE",
                     "  52   | TT HE",
-                    "  54   | AD NL",
+                    //"  54   | AD NL",
                     "   7   | TT HE",
                     "  13   | TT HE",
                     "  23   | TT HE",
@@ -218,7 +247,7 @@ export const segmentDefs = [
                 street: "Oonksweg",
                 town: "Borne",
                 numbers: [
-                    "  42   | HFD | stop 24-8 | mdwdvzz",
+                    //"  42   | HFD | stop 24-8 | mdwdvzz",
                     "  42   | TT HE",
                     "  50   | TT HE",
                 ],
@@ -578,6 +607,7 @@ export const tourDefs = [
                     "Erve Oosterveld",
                     "Erve Escher",
                     "Erve Timmerman",
+                    "Erve Kokenberg",
                 ],
             },
         ],
@@ -807,11 +837,24 @@ export const tourDefs = [
                 ],
             },
             {
+                desc: "Hoofdstraat & Erve Kokenberg",
+                parts: [
+                    {
+                        street: "Hoofdstraat",
+                        numbers: "117,113,111,58,56,54,109,107,105,52,50,103,101,99,97,48,46,95,93,91,44"
+                    },
+                    {
+                        street: "Erve Kokenberg",
+                        numbers: "1,3"
+                    },
+                ],
+            },
+            {
                 desc: "Hoofdstraat & Albergerweg",
                 parts: [  
                     {
                         street: "Hoofdstraat",
-                        numbers: "117,113,111,58,56,54,109,107,105,52,50,103,101,99,97,48,46,95,93,91,44,89,87,85,81,79,38,36,34,69,67,65,32,30-A,30,28,59-A,59,57,26-A,26,24"          
+                        numbers: "89,87,85,81,79,38,36,34,69,67,65,32,30-A,30,28,59-A,59,57,26-A,26,24"          
                     },
                     {
                         street: "Albergerweg",
