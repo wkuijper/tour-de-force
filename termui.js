@@ -223,3 +223,58 @@ export class TUIField {
     }
 }
 
+class TUIEditor {
+
+    constructor(field) {
+        if (field._editor !== null) {
+            throw new Error(`invariant violation`);
+        }
+        this.__field = field;
+        field._editor = this;
+    }
+}
+
+class TUITextEditor extends TUIEditor {
+
+    constructor(field) {
+        super(field);
+        this.__charactersBeforeCaret = [];
+        this.__overwrite = false;
+        this.__charactersUnderCaret = [];
+        this.__charactersAfterCaret = [...field.characters];
+    }
+
+    _moveCaretRight(n) {
+        if (__overwrite) {
+            for (let c = 0; c < n; c++) {
+                if (this.__charactersAfterCaret.length <= 0) {
+                    return;
+                }   
+                this.__charactersBeforeCaret.push(...this.__charactersUnderCaret);
+                this.__charactersUnderCaret.length = 0;
+                this.__charactersUnderCaret.push(this.__charactersAfterCaret.pop());
+            }    
+        } else {
+            if (this.__charactersUnderCaret.length !== 0) {
+                throw new Error(`invariant violation`);
+            }
+            for (let c = 0; c < n; c++) {
+                if (this.__charactersAfterCaret.length <= 0) {
+                    return;
+                }   
+                this.__charactersBeforeCaret.push(...this.__charactersAfterCaret.pop());
+            }
+        }
+    }
+    
+    moveCaret(right) {
+        if (right === 0) {
+            return;
+        }
+        if (right < 0) {
+            this._moveCaretLeft(-right);
+        } else {
+            this._moveCaretRight(right);
+        }
+    }
+}
